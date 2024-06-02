@@ -47,10 +47,11 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+    /*
     SendableRegistry.addChild(m_robotDrive, m_leftFront);
     SendableRegistry.addChild(m_robotDrive, m_leftBack);
     SendableRegistry.addChild(m_robotDrive, m_rightFront);
-    SendableRegistry.addChild(m_robotDrive, m_rightBack);
+    SendableRegistry.addChild(m_robotDrive, m_rightBack);*/
 
     // Right gearbox faces opposite direciton
     m_rightFront.setInverted(true);
@@ -97,8 +98,9 @@ public class Robot extends TimedRobot {
     if (m_timer.get() < 2.0) {
       // Drive forwards half speed, make sure to turn input squaring off
       m_robotDrive.arcadeDrive(0.5, 0.0, false);
-    } else {
-      m_robotDrive.stopMotor(); // stop robot
+    }
+    else {
+      m_robotDrive.stopMotor();
     }
   }
 
