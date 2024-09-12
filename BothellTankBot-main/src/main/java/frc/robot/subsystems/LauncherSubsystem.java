@@ -41,7 +41,7 @@ public class LauncherSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        Console.Log(a_timer.get());
+        System.out.println(a_timer.get());
         // Intakes on A button
         if (controller.a().getAsBoolean()) {
             upperMotor.setVoltage(-2);
