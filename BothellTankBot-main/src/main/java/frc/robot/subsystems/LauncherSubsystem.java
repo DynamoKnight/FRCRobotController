@@ -1,18 +1,17 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class LauncherSubsystem extends SubsystemBase {
     //shooter motors
-    CANSparkMax upperMotor = new CANSparkMax(5, MotorType.kBrushless);
-    CANSparkMax lowerMotor = new CANSparkMax(22, MotorType.kBrushless);
+    CANSparkFlex upperMotor = new CANSparkFlex(5, MotorType.kBrushless);
+    CANSparkFlex lowerMotor = new CANSparkFlex(22, MotorType.kBrushless); // rename 6
 
     CommandXboxController controller;
     Timer a_timer = new Timer();
@@ -51,7 +50,7 @@ public class LauncherSubsystem extends SubsystemBase {
             upperMotor.setVoltage(12);
             a_timer.restart();
             if (a_timer.get() > 2){
-                lowerMotor.setVoltage(4);
+                lowerMotor.setVoltage(12);
             }
             
         } else if (controller.b().getAsBoolean()) {

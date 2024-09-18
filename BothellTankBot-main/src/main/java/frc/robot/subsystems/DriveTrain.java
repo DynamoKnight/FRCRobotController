@@ -15,35 +15,38 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class DriveTrain extends SubsystemBase {
   
-  //4 motors of the base
+  // The 4 motors of the base
   CANSparkMax frontLeftMotor = new CANSparkMax(1, MotorType.kBrushless);
   CANSparkMax backLeftMotor = new CANSparkMax(2, MotorType.kBrushless);
   CANSparkMax frontRightMotor = new CANSparkMax(3, MotorType.kBrushless);
   CANSparkMax backRightMotor = new CANSparkMax(4, MotorType.kBrushless);
 
   CommandXboxController controller = null;
+  // Constants
   double movePower = 0.3;
   double turnPower = 0.3;
+  double fastMovePower = 0.7;
+  double fastTurnPower = 0.7;
 
   /** Creates a new ExampleSubsystem. */
   public DriveTrain() {
-    //reset
-    frontRightMotor.restoreFactoryDefaults();
+    // Reboots
     frontLeftMotor.restoreFactoryDefaults();
-    backRightMotor.restoreFactoryDefaults();
+    frontRightMotor.restoreFactoryDefaults();
     backLeftMotor.restoreFactoryDefaults();
-    //when idle, robot brakes/stops immediately
-    frontRightMotor.setIdleMode(IdleMode.kBrake);
+    backRightMotor.restoreFactoryDefaults();
+    // When idle, Robot brakes immediately instead of coasting
     frontLeftMotor.setIdleMode(IdleMode.kBrake);
-    backRightMotor.setIdleMode(IdleMode.kBrake);
+    frontRightMotor.setIdleMode(IdleMode.kBrake);
     backLeftMotor.setIdleMode(IdleMode.kBrake);
-    //inverts front and back
+    backRightMotor.setIdleMode(IdleMode.kBrake);
+    // Inverts Right motors because they're oppositely orientated
     frontRightMotor.setInverted(true);
     backRightMotor.setInverted(true);
 
   }
 
-
+  // Sets the controller
   public void setController(CommandXboxController driveController) {
     controller = driveController;
   }
@@ -73,34 +76,39 @@ public class DriveTrain extends SubsystemBase {
     return false;
   }
 
+  // This method will be called once per scheduler run
   @Override
   public void periodic() {
     
-    //if controller exists
+    // Checks if controller is connected
     if (controller != null) {
-      //represents power 0 -> 1
+      // Represents the power from 0-1 of the joysticks axes
       double leftY;
       double rightX;
-      //if holding left and right trigger
+      // Left & Right Trigger: Fast movement & turn
       if (controller.getLeftTriggerAxis() > 0.5 && controller.getRightTriggerAxis() > 0.5) {
-        //regular movement
-        turnPower = 0.7;
-        leftY = -controller.getLeftY() * movePower;
-        rightX = -controller.getRightX() * turnPower;
-        //if only holding left trigger, slower forward and back
-      } else if (controller.getLeftTriggerAxis() > 0.5) {
-        leftY = -controller.getLeftY() * 0.5;
-        rightX = -controller.getRightX();
-        //if only holding right, slower turning
-      } else if (controller.getRightTriggerAxis() > 0.5) {
-        leftY = -controller.getLeftY();
-        rightX = -controller.getRightX() * 0.5;
-        //no trigger pressed, both slower
-      } else {
-      leftY = -controller.getLeftY() * 0.5;
-      rightX = -controller.getRightX() * 0.5;
+        // The input is squared to make smaller values smaller, allowing a gradual increase
+        // Math.signum returns the sign of the input, which needs to be preserved
+        // It is multiplied by a negative number because
+        leftY = -Math.signum(controller.getLeftY()) * Math.pow(controller.getLeftY(), 2) * fastMovePower;
+        rightX = -Math.signum(controller.getRightX()) * Math.pow(controller.getRightX(), 2) * fastTurnPower;
+      } 
+      // Left Trigger: Fast movement
+      else if (controller.getLeftTriggerAxis() > 0.5) {
+        leftY = -Math.signum(controller.getLeftY()) * Math.pow(controller.getLeftY(), 2) * fastMovePower;;
+        rightX = -Math.signum(controller.getRightX()) * Math.pow(controller.getRightX(), 2) * turnPower;
+      } 
+      // Right Trigger: Fast turn
+      else if (controller.getRightTriggerAxis() > 0.5) {
+        leftY = -Math.signum(controller.getLeftY()) * Math.pow(controller.getLeftY(), 2) * movePower;
+        rightX = -Math.signum(controller.getRightX()) * Math.pow(controller.getRightX(), 2) * fastTurnPower;
+      } 
+      // Regular movement & turn
+      else {
+        leftY = -Math.signum(controller.getLeftY()) * Math.pow(controller.getLeftY(), 2) * movePower;
+        rightX = -Math.signum(controller.getRightX()) * Math.pow(controller.getRightX(), 2) * turnPower;
       }
-      //deadzone
+      // Sets the deadzone of the joysticks
       if (Math.abs(leftY) < 0.2) {
         leftY = 0;
       }
@@ -108,24 +116,24 @@ public class DriveTrain extends SubsystemBase {
         rightX = 0;
       }
 
+      // Calculates the vectors
       double rightSide = leftY + rightX;
       double leftSide = leftY - rightX;
 
-      //finds max power, normalizes speed based on max (making range 0 -> 1)
+      // Finds max power
       double max = Math.max(Math.abs(rightSide), Math.abs(leftSide));
-
+      // Normalizes speed based on the max (making range 0-1)
       if (max > 1) {
         rightSide /= max;
         leftSide /= max;
       }
-      // double left = 0.1;
-      // double right = 0.1;
-      frontRightMotor.set(rightSide);
+
+      // Sets the power of the motors
       frontLeftMotor.set(leftSide);
-      backRightMotor.set(rightSide);
       backLeftMotor.set(leftSide);
+      frontRightMotor.set(rightSide);
+      backRightMotor.set(rightSide);
     }
-    // This method will be called once per scheduler run
   }
 
   @Override
