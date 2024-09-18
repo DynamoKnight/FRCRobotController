@@ -61,8 +61,11 @@ public class LauncherSubsystem extends SubsystemBase {
             upperMotor.setVoltage(0);
         }
         // Outtakes on Right Trigger
-        if (controller.getRightTriggerAxis() > 0.5){
+        if (controller.x().getAsBoolean()){
             servorThrower.set(0);
+        }
+        if (controller.b().getAsBoolean()){
+            servorThrower.set(0.5);
         }
         
     }
