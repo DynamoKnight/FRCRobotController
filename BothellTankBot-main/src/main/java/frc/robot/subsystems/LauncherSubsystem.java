@@ -13,16 +13,19 @@ public class LauncherSubsystem extends SubsystemBase {
     //shooter motors
     CANSparkFlex upperMotor = new CANSparkFlex(5, MotorType.kBrushless);
     CANSparkFlex lowerMotor = new CANSparkFlex(22, MotorType.kBrushless); // rename 6
-    Servo servorThrower = new Servo(1);
-
+    Servo servoThrower = new Servo(1);
 
     CommandXboxController controller;
     Timer a_timer = new Timer();
+    Boolean isRunning = false;
+
+    double lowPower = 1;
+    double upPower = 1;
 
     //takes in controller, inverts upper and lower
     public LauncherSubsystem(CommandXboxController controller) {
         this.controller = controller;
-        servorThrower.set(0.15);
+        servoThrower.set(0);
         lowerMotor.setInverted(false);
         upperMotor.setInverted(false);
     }
@@ -44,29 +47,60 @@ public class LauncherSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        System.out.println(a_timer.get());
         // Intakes on A button
         if (controller.a().getAsBoolean()) {
             upperMotor.setVoltage(-4);
             lowerMotor.setVoltage(-4);
         }
-        // Motors Spin outwards on Left Trigger
-        else if (controller.getLeftTriggerAxis() > 0.5){
-            upperMotor.setVoltage(12);
-            lowerMotor.setVoltage(12);
-        }
-        // Nothing is pressed don't move
+        // Left trigger starts the outtake to the top
+        else if (controller.getLeftTriggerAxis() > 0.5 && !isRunning) {
+            // Starts timer and indicates isRunning
+            isRunning = true;
+            // Resets the timer to 0
+            a_timer.reset();
+            a_timer.start();
+            // Sets power
+            upPower = 1;
+            lowPower = 0.8;
+        } 
+        // Down d-pad starts the outtake to the bottom
+        else if (controller.getHID().getPOV() == 180 && !isRunning) {
+            // Starts timer and indicates isRunning
+            isRunning = true;
+            // Resets the timer to 0
+            a_timer.reset();
+            a_timer.start();
+            // Sets power
+            upPower = 0.25;
+            lowPower = 0.25;
+        } 
+        // Runs while isRunning is true
+        else if (isRunning) {
+            // Motors Spin outwards while isRunning
+            upperMotor.set(upPower);
+            lowerMotor.set(lowPower);
+            // After 2 seconds, the servo launches
+            if (a_timer.get() > 2 && a_timer.get() <= 3) {
+                servoThrower.set(0.5);
+            }
+            // After 3 seconds, stops the outtake
+            if (a_timer.get() > 3) {
+                isRunning = false;
+                a_timer.stop();
+                // Stops the motors and Resets the servo
+                lowerMotor.set(0);
+                upperMotor.set(0);
+                servoThrower.set(0);
+            }
+        } 
+        // If nothing is pressed, stop the motors and reset the servo
         else {
-            lowerMotor.setVoltage(0);
-            upperMotor.setVoltage(0);
+            lowerMotor.set(0);
+            upperMotor.set(0);
+            // Servo's default position
+            servoThrower.set(0);
         }
-        // Outtakes on Right Trigger
-        if (controller.x().getAsBoolean()){
-            servorThrower.set(0);
-        }
-        if (controller.b().getAsBoolean()){
-            servorThrower.set(0.5);
-        }
+
         
     }
 

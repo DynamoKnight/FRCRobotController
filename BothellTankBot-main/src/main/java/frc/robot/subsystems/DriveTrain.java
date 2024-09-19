@@ -89,7 +89,7 @@ public class DriveTrain extends SubsystemBase {
       double rightX;
       // The input is squared to make smaller values smaller, allowing a gradual increase
       // Math.signum returns the sign of the input, which needs to be preserved
-      // It is multiplied by a negative number because chatgpt
+      // It negated because the controllers are inverted for some reason!
       leftY = -Math.signum(controller.getLeftY()) * Math.pow(controller.getLeftY(), 2) * movePower;
       rightX = -Math.signum(controller.getRightX()) * Math.pow(controller.getRightX(), 2) * turnPower;
       /*// Sets the deadzone of the joysticks
