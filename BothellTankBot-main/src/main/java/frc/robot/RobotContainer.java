@@ -25,8 +25,12 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public final DriveTrain m_driveTrain = new DriveTrain();
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  public final CommandXboxController m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
-  public final LauncherSubsystem launcher = new LauncherSubsystem(m_driverController);
+  // Drivetrain
+  public final CommandXboxController m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort0);
+  // Launcher
+  public final CommandXboxController m_driverController2 = new CommandXboxController(OperatorConstants.kDriverControllerPort1);
+
+  public final LauncherSubsystem launcher = new LauncherSubsystem(m_driverController2);
   // The SendableChooser allows several commands to be added 
   SendableChooser<Command> sc = new SendableChooser<Command>();
 

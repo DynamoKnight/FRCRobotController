@@ -26,6 +26,9 @@ public class LauncherSubsystem extends SubsystemBase {
     public double ampUpPower = 0.25;
     public double ampLowPower = 0.25;
 
+    public double upPower = 1;
+    public double lowPower = 1;
+
     // Initializes the motors and controller
     public LauncherSubsystem(CommandXboxController controller) {
         this.controller = controller;
@@ -51,34 +54,65 @@ public class LauncherSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // Intakes on A button
-        if (controller.a().getAsBoolean()) {
-            upperMotor.setVoltage(-4);
-            lowerMotor.setVoltage(-4);
-        }
         // Left trigger starts the outtake to the speaker
-        else if (controller.getLeftTriggerAxis() > 0.5 && !isRunning) {
+        if (controller.getLeftTriggerAxis() > 0.5 && !isRunning) {
             // Starts timer and indicates isRunning
             isRunning = true;
-            launch(spkrUpPower, spkrLowPower);
+            startLaunch(spkrUpPower, spkrLowPower);
         } 
         // Down d-pad starts the outtake to the amp
         else if (controller.getHID().getPOV() == 180 && !isRunning) {
             // Starts timer and indicates isRunning
             isRunning = true;
-            launch(ampUpPower, ampLowPower);
-        } 
-        // Runs while isRunning is true
-        else if (isRunning) {
-            // Hopefully when launch is called, it stays in the while loop,
-            // if not, this will make sure that the launching process continues. 
-        } 
-        // If nothing is pressed, stop
+            startLaunch(ampUpPower, ampLowPower);
+        }
+
+        // Check if the launcher is running
+        if (isRunning) {
+            double elapsedTime = a_timer.get();
+            // For the first 2 seconds, rev the motors
+            if (elapsedTime < 2) {
+                upperMotor.set(upPower);
+                lowerMotor.set(lowPower);
+            }
+            // Between 2 and 3 seconds, activate the servo
+            else if (elapsedTime >= 2 && elapsedTime <= 3) {
+                servoThrower.set(0.5);
+            }
+            // After 3 seconds, stop everything
+            else {
+                isRunning = false;
+                a_timer.stop();
+                resetLauncher();
+            }
+        }
+        // Intakes on A button
+        else if (controller.a().getAsBoolean()) {
+            upperMotor.setVoltage(-4);
+            lowerMotor.setVoltage(-4);
+        }
+        // If nothing is pressed, stop the motors and reset the servo
         else {
             resetLauncher();
         }
+    }
 
-        
+    public void startLaunch(double upPower, double lowPower) {
+        // Resets the timer to 0
+        a_timer.reset();
+        a_timer.start();
+        isRunning = true;
+    
+        // Set power levels for the launch
+        this.upPower = upPower;
+        this.lowPower = lowPower;
+    }
+
+    // Stops the motors and resets the servo to original posititon
+    public void resetLauncher(){
+        lowerMotor.set(0);
+        upperMotor.set(0);
+        servoThrower.set(0.15);
     }
 
     /**
@@ -106,12 +140,7 @@ public class LauncherSubsystem extends SubsystemBase {
         resetLauncher();
     }
 
-    // Stops the motors and resets the servo to original posititon
-    public void resetLauncher(){
-        lowerMotor.set(0);
-        upperMotor.set(0);
-        servoThrower.set(0);
-    }
+    
 
 
     
