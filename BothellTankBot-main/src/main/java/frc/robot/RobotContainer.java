@@ -9,6 +9,8 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.LauncherSubsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -21,19 +23,26 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final DriveTrain m_driveTrain = new DriveTrain();
-  
-  
+  public final DriveTrain m_driveTrain = new DriveTrain();
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
-
-  private final LauncherSubsystem launcher = new LauncherSubsystem(m_driverController);
+  public final CommandXboxController m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  public final LauncherSubsystem launcher = new LauncherSubsystem(m_driverController);
+  // The SendableChooser allows several commands to be added 
+  SendableChooser<Command> sc = new SendableChooser<Command>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Configure the trigger bindings
+    // Configures the trigger bindings of the controller
     configureBindings();
+    // Adds different Autonomous options
+    sc.addOption("AutoMiddle", Autos.middleAuto(m_driveTrain, launcher));
+    sc.addOption("AutoLeft", Autos.leftAuto(m_driveTrain, launcher));
+    sc.addOption("AutoRight", Autos.rightAuto(m_driveTrain, launcher));
+    sc.addOption("AutoRightEsc", Autos.rightAutoEsc(m_driveTrain, launcher));
+    // The default
+    sc.setDefaultOption("AutoMiddle", Autos.middleAuto(m_driveTrain, launcher));
+    // Adds onto SmartDashboard for telemetry
+    SmartDashboard.putData("AutoChooser", sc);
   }
 
   /**
@@ -47,22 +56,22 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_driveTrain::exampleCondition)
-        .onTrue(new ExampleCommand(m_driveTrain));
+    // The Trigger checks the state of an 'exampleCondition', and when it is true, it will execute the 'ExampleCommand'
+    // The Trigger is kept alive by the CommandScheduler
+    new Trigger(m_driveTrain::exampleCondition).onTrue(new ExampleCommand(m_driveTrain));
 
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    // m_driverController.b().whileTrue(m_driveTrain.exampleMethodCommand());
+    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed, cancelling on release.
+    //m_driverController.b().whileTrue(m_driveTrain.exampleMethodCommand());
+
+    // Sets the controller of the drivetrain
     m_driveTrain.setController(m_driverController);
   }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    return Autos.exampleAuto(m_driveTrain);
+    return sc.getSelected();
   }
 }

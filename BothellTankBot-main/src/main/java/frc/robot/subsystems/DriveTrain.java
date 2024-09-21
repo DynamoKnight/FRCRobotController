@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -28,7 +29,7 @@ public class DriveTrain extends SubsystemBase {
   double movePower = 0.3;
   double turnPower = 0.3;
   double fastMovePower = 1;
-  double fastTurnPower = 1;
+  double fastTurnPower = 0.7;
 
   /** Creates a new ExampleSubsystem. */
   public DriveTrain() {
@@ -55,7 +56,6 @@ public class DriveTrain extends SubsystemBase {
 
   /**
    * Example command factory method.
-   *
    * @return a command
    */
   public Command exampleMethodCommand() {
@@ -68,9 +68,7 @@ public class DriveTrain extends SubsystemBase {
   }
 
   /**
-   * An example method querying a boolean state of the subsystem (for example, a
-   * digital sensor).
-   *
+   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
    * @return value of some boolean subsystem state, such as a digital sensor.
    */
   public boolean exampleCondition() {
@@ -81,7 +79,6 @@ public class DriveTrain extends SubsystemBase {
   // This method will be called once per scheduler run
   @Override
   public void periodic() {
-    
     // Checks if controller is connected
     if (controller != null) {
       // Represents the power from 0-1 of the joysticks axes
@@ -90,13 +87,13 @@ public class DriveTrain extends SubsystemBase {
       // The input is squared to make smaller values smaller, allowing a gradual increase
       // Math.signum returns the sign of the input, which needs to be preserved
       // It negated because the controllers are inverted for some reason!
-      leftY = -Math.signum(controller.getLeftY()) * Math.pow(controller.getLeftY(), 2) * movePower;
-      rightX = -Math.signum(controller.getRightX()) * Math.pow(controller.getRightX(), 2) * turnPower;
+      leftY = -Math.signum(controller.getLeftY()) * Math.pow(controller.getLeftY(), 2) * fastMovePower;
+      rightX = -Math.signum(controller.getRightX()) * Math.pow(controller.getRightX(), 2) * fastTurnPower;
       /*// Sets the deadzone of the joysticks
-      if (Math.abs(leftY) < 0.2) {
+      if (Math.abs(controller.getLeftY()) < 0.1) {
         leftY = 0;
       }
-      if (Math.abs(rightX) < 0.2) {
+      if (Math.abs(controller.getRightX()) < 0.1) {
         rightX = 0;
       }*/
       
@@ -113,10 +110,14 @@ public class DriveTrain extends SubsystemBase {
       }
 
       // Sets the power of the motors
-      frontLeftMotor.set(leftSide);
-      backLeftMotor.set(leftSide);
-      frontRightMotor.set(rightSide);
-      backRightMotor.set(rightSide);
+      // Makes sure it doesn't clash with auto
+      if (!DriverStation.isAutonomous()){
+        frontLeftMotor.set(leftSide);
+        backLeftMotor.set(leftSide);
+        frontRightMotor.set(rightSide);
+        backRightMotor.set(rightSide);
+      }
+      
     }
   }
 
@@ -124,4 +125,36 @@ public class DriveTrain extends SubsystemBase {
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
   }
+
+   /**
+   * Moves the robot forward by setting power to both sides.
+   * @param power Positive or negative power for the motor
+   */
+  public void moveForward(double power) {
+    frontLeftMotor.set(power);
+    backLeftMotor.set(power);
+    frontRightMotor.set(power);
+    backRightMotor.set(power);
+  }
+
+  /**
+   * Turns the robot by spinning the motors in opposite directions.
+   * @param power Power to turn (positive for clockwise, negative for counterclockwise)
+   */
+  public void turn(double power) {
+    frontLeftMotor.set(power);
+    backLeftMotor.set(power);
+    frontRightMotor.set(-power);
+    backRightMotor.set(-power);
+  }
+
+  /*** Stops all the motors.*/
+  public void stop() {
+    frontLeftMotor.set(0);
+    backLeftMotor.set(0);
+    frontRightMotor.set(0);
+    backRightMotor.set(0);
+  }
+
+
 }
