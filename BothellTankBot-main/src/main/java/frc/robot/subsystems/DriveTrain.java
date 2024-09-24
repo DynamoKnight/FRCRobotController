@@ -23,8 +23,11 @@ public class DriveTrain extends SubsystemBase {
   CANSparkMax frontRightMotor = new CANSparkMax(3, MotorType.kBrushless);
   CANSparkMax backRightMotor = new CANSparkMax(4, MotorType.kBrushless);
 
-
+  // Driver Controller
   CommandXboxController controller = null;
+  // Indicates Driver Mode
+  double driverMode = 0;
+  boolean togglePressed = false;
   // Constants
   double movePower = 0.3;
   double turnPower = 0.3;
@@ -46,6 +49,9 @@ public class DriveTrain extends SubsystemBase {
     // Inverts Right motors because they're oppositely orientated
     frontRightMotor.setInverted(true);
     backRightMotor.setInverted(true);
+
+    //backLeftMotor.follow(frontLeftMotor);
+    //backRightMotor.follow(frontRightMotor);
 
   }
 
@@ -84,11 +90,47 @@ public class DriveTrain extends SubsystemBase {
       // Represents the power from 0-1 of the joysticks axes
       double leftY;
       double rightX;
-      // The input is squared to make smaller values smaller, allowing a gradual increase
-      // Math.signum returns the sign of the input, which needs to be preserved
-      // It negated because the controllers are inverted for some reason!
-      leftY = -Math.signum(controller.getLeftY()) * Math.pow(controller.getLeftY(), 2) * fastMovePower;
-      rightX = -Math.signum(controller.getRightX()) * Math.pow(controller.getRightX(), 2) * fastTurnPower;
+      // Toggles type of drive if Back Button and Stat button is pressed at same time
+      // Makes sure it doens't re-enter clause if held. 
+      if (controller.back().getAsBoolean() && controller.start().getAsBoolean() && !togglePressed){
+        togglePressed = true;
+        if (driverMode == 0){
+          driverMode = 1;
+          System.out.println("DRIVE-TURN Mode ACTIVE");
+        }
+        else if (driverMode == 1){
+          System.out.println("RACECAR Mode ACTIVE");
+          driverMode = 0;
+        }
+      }
+      else{
+        togglePressed = false;
+      }
+      // Drive-Turn movement
+      if (driverMode == 0){
+        // The input is squared to make smaller values smaller, allowing a gradual increase
+        // Math.signum returns the sign of the input, which needs to be preserved
+        // It negated because the joysticks are inverted for some reason!
+        leftY = -Math.signum(controller.getLeftY()) * Math.pow(controller.getLeftY(), 2) * fastMovePower;
+        rightX = -Math.signum(controller.getRightX()) * Math.pow(controller.getRightX(), 2) * fastTurnPower;
+      }
+      // Rocket League movement (ADRIAN)
+      else{
+        // Goes forward
+        if (controller.getRightTriggerAxis() > 0.1){
+          leftY = Math.signum(controller.getRightTriggerAxis()) * Math.pow(controller.getRightTriggerAxis(), 2) * fastMovePower;
+        }
+        // Goes backwards
+        else if (controller.getLeftTriggerAxis() > 0.1){
+          leftY = -Math.signum(controller.getLeftTriggerAxis()) * Math.pow(controller.getLeftTriggerAxis(), 2) * fastMovePower;
+        }
+        // Doesnt move
+        else{
+          leftY = 0;
+        }
+        rightX = -Math.signum(controller.getLeftX()) * Math.pow(controller.getLeftX(), 2) * fastTurnPower;
+      }
+
       /*// Sets the deadzone of the joysticks
       if (Math.abs(controller.getLeftY()) < 0.1) {
         leftY = 0;

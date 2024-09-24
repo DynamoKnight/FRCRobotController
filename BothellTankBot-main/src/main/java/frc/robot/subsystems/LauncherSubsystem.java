@@ -55,57 +55,47 @@ public class LauncherSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // Left trigger starts the outtake to the speaker
-        if (controller.getLeftTriggerAxis() > 0.5 && !isRunning) {
-            // Starts timer and indicates isRunning
-            isRunning = true;
-            startLaunch(spkrUpPower, spkrLowPower);
-        } 
-        // Down d-pad starts the outtake to the amp
-        else if (controller.getHID().getPOV() == 180 && !isRunning) {
-            // Starts timer and indicates isRunning
-            isRunning = true;
-            startLaunch(ampUpPower, ampLowPower);
+        if (controller.getLeftTriggerAxis() > 0.5) {
+            upperMotor.set(spkrUpPower);
+            lowerMotor.set(spkrLowPower);
         }
-
-        // Check if the launcher is running
-        if (isRunning) {
-            double elapsedTime = a_timer.get();
-            // For the first 2 seconds, rev the motors
-            if (elapsedTime < 2) {
-                upperMotor.set(upPower);
-                lowerMotor.set(lowPower);
-            }
-            // Between 2 and 3 seconds, activate the servo
-            else if (elapsedTime >= 2 && elapsedTime <= 3) {
-                servoThrower.set(0.5);
-            }
-            // After 3 seconds, stop everything
-            else {
-                isRunning = false;
-                a_timer.stop();
-                resetLauncher();
-            }
+        // Down d-pad starts the outtake to the amp
+        else if (controller.getHID().getPOV() == 180) {
+            upperMotor.set(ampUpPower);
+            lowerMotor.set(ampLowPower);
         }
         // Intakes on A button
         else if (controller.a().getAsBoolean()) {
             upperMotor.setVoltage(-4);
             lowerMotor.setVoltage(-4);
         }
-        // If nothing is pressed, stop the motors and reset the servo
-        else {
-            resetLauncher();
+        // Dont move at all
+        else{
+            upperMotor.set(0);
+            lowerMotor.set(0);
         }
+        // Hold right trigger->servo launches
+        if(controller.getRightTriggerAxis() > 0.5 && !isRunning){
+            isRunning = true;
+            startLaunch();
+            servoThrower.set(0.5);
+        }
+        //if it is running, stop running after 1 sec
+        if (isRunning)  {
+            if(a_timer.get() > 1){
+                servoThrower.set(0.15);
+                isRunning = false;
+                a_timer.stop();
+            }
+
+        }    
     }
 
-    public void startLaunch(double upPower, double lowPower) {
+    public void startLaunch() {
         // Resets the timer to 0
         a_timer.reset();
         a_timer.start();
         isRunning = true;
-    
-        // Set power levels for the launch
-        this.upPower = upPower;
-        this.lowPower = lowPower;
     }
 
     // Stops the motors and resets the servo to original posititon
