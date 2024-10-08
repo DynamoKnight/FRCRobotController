@@ -21,18 +21,23 @@ public class LauncherSubsystem extends SubsystemBase {
     // Indicates if the launcher is in action
     Boolean isRunning = false;
 
+    // Power to launch to speaker
     public double spkrUpPower = 1;
     public double spkrLowPower = 0.8;
+    // Power to launch to amp
     public double ampUpPower = 0.25;
     public double ampLowPower = 0.25;
+    // Power for both motors to intake
+    public double intakePower = 0.3;
 
-    public double upPower = 1;
-    public double lowPower = 1;
+    // Holds note down then up
+    public double servoPos0 = 0.5;
+    public double servoPos1 = 1;
 
     // Initializes the motors and controller
     public LauncherSubsystem(CommandXboxController controller) {
         this.controller = controller;
-        servoThrower.set(0);
+        servoThrower.set(servoPos0);
         lowerMotor.setInverted(false);
         upperMotor.setInverted(false);
     }
@@ -46,10 +51,10 @@ public class LauncherSubsystem extends SubsystemBase {
         lowerMotor.setVoltage(voltage);
     }
 
-    // Set voltage for both motors
-    public void intake(double voltage) {
-        upperMotor.setVoltage(-voltage);
-        lowerMotor.setVoltage(-voltage);
+    // Set power for both motors from 0-1
+    public void intake(double power) {
+        upperMotor.set(-power);
+        lowerMotor.set(-power);
     }
 
     @Override
@@ -66,8 +71,7 @@ public class LauncherSubsystem extends SubsystemBase {
         }
         // Intakes on A button
         else if (controller.a().getAsBoolean()) {
-            upperMotor.setVoltage(-4);
-            lowerMotor.setVoltage(-4);
+            intake(intakePower);
         }
         // Dont move at all
         else{
@@ -78,12 +82,12 @@ public class LauncherSubsystem extends SubsystemBase {
         if(controller.getRightTriggerAxis() > 0.5 && !isRunning){
             isRunning = true;
             startLaunch();
-            servoThrower.set(0.5);
+            servoThrower.set(servoPos1);
         }
         //if it is running, stop running after 1 sec
         if (isRunning)  {
             if(a_timer.get() > 1){
-                servoThrower.set(0.15);
+                servoThrower.set(servoPos0);
                 isRunning = false;
                 a_timer.stop();
             }
@@ -102,7 +106,7 @@ public class LauncherSubsystem extends SubsystemBase {
     public void resetLauncher(){
         lowerMotor.set(0);
         upperMotor.set(0);
-        servoThrower.set(0.15);
+        servoThrower.set(servoPos0);
     }
 
     /**
@@ -122,7 +126,7 @@ public class LauncherSubsystem extends SubsystemBase {
         }
         // After 2 seconds, the servo launches
         while (a_timer.get() > 2 && a_timer.get() <= 3){
-            servoThrower.set(0.5);
+            servoThrower.set(servoPos1);
         }
         // After 3 seconds, it stops the outtake
         isRunning = false;
