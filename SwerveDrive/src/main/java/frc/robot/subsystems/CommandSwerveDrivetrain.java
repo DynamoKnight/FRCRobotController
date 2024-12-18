@@ -7,7 +7,6 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -39,10 +38,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
     }
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
-        super(driveTrainConstants, modules);
-        if (Utils.isSimulation()) {
-            startSimThread();
-        }
+        // The Default OdometryUpdateFrequency value is 0.
+        // This is according to the constructor of the SwerveDrivetrain
+        this(driveTrainConstants, 0, modules);
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
@@ -80,4 +78,5 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             });
         }
     }
+
 }
