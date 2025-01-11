@@ -79,4 +79,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
     }
 
+    void configurePathPlanner(){
+        
+    }
+
 }
