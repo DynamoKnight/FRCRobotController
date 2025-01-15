@@ -15,7 +15,7 @@ public class Robot extends TimedRobot {
 
   private final RobotContainer m_robotContainer;
 
-  private final boolean kUseLimelight = false;
+  private final boolean kUseLimelight = true;
 
   public Robot() {
     m_robotContainer = new RobotContainer();
@@ -25,6 +25,23 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
 
+    // Switch to pipeline 0
+    LimelightHelpers.setPipelineIndex("limelight-arrow", 0);
+    // Basic targeting data
+    double tx = LimelightHelpers.getTX("limelight-arrow");  // Horizontal offset from crosshair to target in degrees
+    double ty = LimelightHelpers.getTY("limelight-arrow");  // Vertical offset from crosshair to target in degrees
+    double ta = LimelightHelpers.getTA("limelight-arrow");  // Target area (0% to 100% of image)
+    boolean hasTarget = LimelightHelpers.getTV("limelight-arrow"); // Do you have a valid target?
+
+    double txnc = LimelightHelpers.getTXNC("limelight-arrow");  // Horizontal offset from principal pixel/point to target in degrees
+    double tync = LimelightHelpers.getTYNC("limelight-arrow");  // Vertical  offset from principal pixel/point to target in degrees
+    
+    System.out.println(tx);
+    System.out.println(ty);
+    System.out.println(ta);
+    System.out.println(hasTarget);
+    System.out.println(txnc);
+    System.out.println(tync);
     /*
      * This example of adding Limelight is very simple and may not be sufficient for on-field use.
      * Users typically need to provide a standard deviation that scales with the distance to target
@@ -33,11 +50,16 @@ public class Robot extends TimedRobot {
      * This example is sufficient to show that vision integration is possible, though exact implementation
      * of how to use vision should be tuned per-robot and to the team's specification.
      */
+    
+    LimelightHelpers.setLEDMode_PipelineControl("limelight-arrow");
+    LimelightHelpers.setLEDMode_ForceOn("limelight-arrow");
+
     if (kUseLimelight) {
-      var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
-      if (llMeasurement != null) {
-        m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, Utils.fpgaToCurrentTime(llMeasurement.timestampSeconds));
-      }
+      LimelightHelpers.PoseEstimate llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-arrow");
+      LimelightHelpers.printPoseEstimate(llMeasurement);
+     // if (llMeasurement != null) {
+     //   m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, Utils.fpgaToCurrentTime(llMeasurement.timestampSeconds));
+     // }
     }
   }
 
