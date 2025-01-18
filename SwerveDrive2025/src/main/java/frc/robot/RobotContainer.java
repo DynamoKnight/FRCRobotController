@@ -47,8 +47,9 @@ public class RobotContainer {
     /* Path follower */
     private final SendableChooser<Command> autoChooser;
 
-    public RobotContainer() {
-        autoChooser = AutoBuilder.buildAutoChooser("Tests");
+    public RobotContainer() {        
+        // Adds the Test_Auto as the default autonomous
+        autoChooser = AutoBuilder.buildAutoChooser("Test_Auto");
         SmartDashboard.putData("Auto Mode", autoChooser);
 
         configureBindings();

@@ -35,13 +35,6 @@ public class Robot extends TimedRobot {
 
     double txnc = LimelightHelpers.getTXNC("limelight-arrow");  // Horizontal offset from principal pixel/point to target in degrees
     double tync = LimelightHelpers.getTYNC("limelight-arrow");  // Vertical  offset from principal pixel/point to target in degrees
-    
-    System.out.println(tx);
-    System.out.println(ty);
-    System.out.println(ta);
-    System.out.println(hasTarget);
-    System.out.println(txnc);
-    System.out.println(tync);
     /*
      * This example of adding Limelight is very simple and may not be sufficient for on-field use.
      * Users typically need to provide a standard deviation that scales with the distance to target
@@ -56,7 +49,7 @@ public class Robot extends TimedRobot {
 
     if (kUseLimelight) {
       LimelightHelpers.PoseEstimate llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-arrow");
-      LimelightHelpers.printPoseEstimate(llMeasurement);
+      //LimelightHelpers.printPoseEstimate(llMeasurement);
      // if (llMeasurement != null) {
      //   m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, Utils.fpgaToCurrentTime(llMeasurement.timestampSeconds));
      // }
