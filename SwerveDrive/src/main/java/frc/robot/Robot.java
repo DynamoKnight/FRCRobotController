@@ -4,105 +4,110 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.Utils;
+
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-/**
- * The VM is configured to automatically run this class, and to call the functions corresponding to
- * each mode, as described in the TimedRobot documentation. If you change the name of this class or
- * the package after creating this project, you must also update the build.gradle file in the
- * project.
- */
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-  private RobotContainer m_robotContainer;
+  private final RobotContainer m_robotContainer;
 
-  /**
-   * This function is run when the robot is first started up and should be used for any initialization code.
-   */
-  @Override
-  public void robotInit() {
-    // Instantiate our RobotContainer. This will perform all our button bindings, and put our
-    // autonomous chooser on the dashboard.
+  private final boolean kUseLimelight = false;
+
+  public Robot() {
     m_robotContainer = new RobotContainer();
   }
 
-  /**
-   * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
-   * that you want ran during disabled, autonomous, teleoperated and test.
-   *
-   * <p>This runs after the mode specific periodic functions, but before LiveWindow and
-   * SmartDashboard integrated updating.
-   */
   @Override
   public void robotPeriodic() {
-    // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
-    // commands, running already-scheduled commands, removing finished or interrupted commands,
-    // and running subsystem periodic() methods.  This must be called from the robot's periodic
-    // block in order for anything in the Command-based framework to work.
-    // The CommandScheduler continuously checks for new commands to schedule. It checks all registered triggers to see if their conditions are true. 
     CommandScheduler.getInstance().run();
+
+    // Switch to pipeline 0
+    LimelightHelpers.setPipelineIndex("limelight-arrow", 0);
+    // Basic targeting data
+    double tx = LimelightHelpers.getTX("limelight-arrow");  // Horizontal offset from crosshair to target in degrees
+    double ty = LimelightHelpers.getTY("limelight-arrow");  // Vertical offset from crosshair to target in degrees
+    double ta = LimelightHelpers.getTA("limelight-arrow");  // Target area (0% to 100% of image)
+    boolean hasTarget = LimelightHelpers.getTV("limelight-arrow"); // Do you have a valid target?
+
+    double txnc = LimelightHelpers.getTXNC("limelight-arrow");  // Horizontal offset from principal pixel/point to target in degrees
+    double tync = LimelightHelpers.getTYNC("limelight-arrow");  // Vertical  offset from principal pixel/point to target in degrees
+
+    LimelightHelpers.setLEDMode_PipelineControl("limelight-arrow");
+    LimelightHelpers.setLEDMode_ForceOn("limelight-arrow");
+    /*
+     * This example of adding Limelight is very simple and may not be sufficient for on-field use.
+     * Users typically need to provide a standard deviation that scales with the distance to target
+     * and changes with number of tags available.
+     *
+     * This example is sufficient to show that vision integration is possible, though exact implementation
+     * of how to use vision should be tuned per-robot and to the team's specification.
+     */
+    if (kUseLimelight) {
+      var driveState = m_robotContainer.drivetrain.getState();
+      double headingDeg = driveState.Pose.getRotation().getDegrees();
+      double omegaRps = Units.radiansToRotations(driveState.Speeds.omegaRadiansPerSecond);
+
+      LimelightHelpers.SetRobotOrientation("limelight", headingDeg, 0, 0, 0, 0, 0);
+      var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+      if (llMeasurement != null && llMeasurement.tagCount > 0 && omegaRps < 2.0) {
+        m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, Utils.fpgaToCurrentTime(llMeasurement.timestampSeconds));
+      }
+    }
   }
 
-  /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {}
 
-  /** This function is called periodically during Disabled mode. */
   @Override
   public void disabledPeriodic() {}
 
-  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
+  @Override
+  public void disabledExit() {}
+
   @Override
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
-    // Schedules the autonomous command
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
   }
 
-  /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {
-    
-  }
+  public void autonomousPeriodic() {}
 
-  /* This function is called when teleop is initialized. */
+  @Override
+  public void autonomousExit() {}
+
   @Override
   public void teleopInit() {
-    // This makes sure that the autonomous stops running when
-    // teleop starts running. If you want the autonomous to
-    // continue until interrupted by another command, remove
-    // this line or comment it out.
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
   }
 
-  /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {}
 
-  /* This function is called when test mode is initialized. */
+  @Override
+  public void teleopExit() {}
+
   @Override
   public void testInit() {
-    // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
   }
 
-  /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {}
 
-  /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {}
+  public void testExit() {}
 
-  /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {}
 }
