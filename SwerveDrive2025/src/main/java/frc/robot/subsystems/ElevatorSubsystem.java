@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import com.ctre.phoenix6.hardware.*;
+import com.ctre.phoenix6.motorcontrol.ControlMode;
 
 public class ElevatorSubsystem extends SubsystemBase{
     public TalonFX backElevator = new TalonFX(14);
@@ -26,17 +27,18 @@ public class ElevatorSubsystem extends SubsystemBase{
     public void periodic() {
         // Intakes on A button
         if (controller.a().getAsBoolean()) {
-            setMotorPower(motorPower);
-        }
-        else{
-            setMotorPower(0);
+            frontElevator.set(ControlMode.PercentOutput, motorPower);
+            backElevator.set(ControlMode.PercentOutput, motorPower);
+        } else {
+            frontElevator.set(ControlMode.PercentOutput, 0);
+            backElevator.set(ControlMode.PercentOutput, 0);
         }
     }
 
     // Sets power of both motors
     public void setMotorPower(double speed){
-        frontElevator.set(speed);
-        backElevator.set(speed);
+        frontElevator.set(ControlMode.PercentOutput, speed);
+        backElevator.set(ControlMode.PercentOutput, speed);
     }
 
     /** Sets the position of both motors.
