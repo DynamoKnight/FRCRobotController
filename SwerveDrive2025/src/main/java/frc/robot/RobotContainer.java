@@ -95,7 +95,7 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
 
         // Runs in the background
-        //elevator.setDefaultCommand(elevator.setReefLevel1());
+        elevator.setDefaultCommand(elevator.setReefLevel1());
     }
 
     public Command getAutonomousCommand() {

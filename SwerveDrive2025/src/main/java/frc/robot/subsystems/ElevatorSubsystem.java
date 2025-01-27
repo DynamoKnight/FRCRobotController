@@ -11,20 +11,22 @@ import com.ctre.phoenix6.hardware.*;
 //import com.ctre.phoenix6.motorcontrol.ControlMode;
 
 public class ElevatorSubsystem extends SubsystemBase{
-    public TalonFX backElevator = new TalonFX(14);
-    public TalonFX frontElevator = new TalonFX(15);
+    public TalonFX backElevator = new TalonFX(14, "canivore");
+    public TalonFX frontElevator = new TalonFX(15, "canivore");
 
     CommandXboxController controller;
     Timer a_timer = new Timer();
     // Indicates if the elevator is in action
     Boolean isRunning = false;
-
+    // A list of the number of rotations for each reef level
+    private double[] rotations = {2 ,4, 6, 8};
+    private int idx = 0;
+    // The speed of the motors
     double motorPower = 0.1;
 
     // Initializes the motors and controller
     public ElevatorSubsystem(CommandXboxController controller) {
         this.controller = controller;
-
         // Configures the motors
         configureMotor(frontElevator);
         configureMotor(backElevator);
@@ -47,14 +49,13 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     @Override
     public void periodic() {
-        // Retrieve and print telemetry values
-        System.out.println("Front Elevator Duty Cycle: " + frontElevator.getDutyCycle().getValue());
-        System.out.println("Front Elevator Supply Voltage: " + frontElevator.getSupplyVoltage().getValue());
-        System.out.println("Front Elevator Stator Current: " + frontElevator.getStatorCurrent().getValue());
         // Intakes on A button
         if (controller.a().getAsBoolean()) {
             setMotorPower(motorPower);
-        } else {
+            // Retrieve and print telemetry values
+            System.out.println("Front Elevator power: " + frontElevator.getDutyCycle().getValue());
+        } 
+        else {
             setMotorPower(0);
         }
     }
