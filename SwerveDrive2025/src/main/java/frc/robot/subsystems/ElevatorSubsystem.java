@@ -57,6 +57,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         } 
         else {
             setMotorPower(0);
+            setBrakeMode();
         }
     }
 
@@ -64,6 +65,13 @@ public class ElevatorSubsystem extends SubsystemBase{
     public void setMotorPower(double speed){
         frontElevator.setControl(new DutyCycleOut(speed));
         backElevator.setControl(new DutyCycleOut(speed));
+    }
+
+    
+    // Sets both motors to brake mode
+    public void setBrakeMode(){
+        frontElevator.setNeutralMode(NeutralMode.Brake);
+        backElevator.setNeutralMode(NeutralMode.Brake);
     }
 
     /** Sets the position of both motors.
