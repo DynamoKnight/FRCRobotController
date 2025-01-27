@@ -9,6 +9,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.*;
 //import com.ctre.phoenix6.motorcontrol.ControlMode;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class ElevatorSubsystem extends SubsystemBase{
     public TalonFX backElevator = new TalonFX(14, "canivore");
@@ -45,19 +46,23 @@ public class ElevatorSubsystem extends SubsystemBase{
         // Refreshes and applies the current
         motor.getConfigurator().refresh(currentConfiguration);
         motor.getConfigurator().apply(currentConfiguration);
+        // Brakes motor when not receiving power
+        motor.setNeutralMode(NeutralModeValue.Brake);
     }
 
     @Override
     public void periodic() {
-        // Intakes on A button
-        if (controller.a().getAsBoolean()) {
+        // Moves up on dpad up button
+        if (controller.povUp().getAsBoolean()) {
             setMotorPower(motorPower);
-            // Retrieve and print telemetry values
-            System.out.println("Front Elevator power: " + frontElevator.getDutyCycle().getValue());
-        } 
+            //System.out.println(frontElevator.getDutyCycle().getValue()); // Returns the power
+        }
+        // Moves down on dpad down button
+        else if (controller.povDown().getAsBoolean()) {
+            setMotorPower(-motorPower);
+        }
         else {
             setMotorPower(0);
-            setBrakeMode();
         }
     }
 
@@ -65,13 +70,6 @@ public class ElevatorSubsystem extends SubsystemBase{
     public void setMotorPower(double speed){
         frontElevator.setControl(new DutyCycleOut(speed));
         backElevator.setControl(new DutyCycleOut(speed));
-    }
-
-    
-    // Sets both motors to brake mode
-    public void setBrakeMode(){
-        frontElevator.setNeutralMode(NeutralMode.Brake);
-        backElevator.setNeutralMode(NeutralMode.Brake);
     }
 
     /** Sets the position of both motors.
