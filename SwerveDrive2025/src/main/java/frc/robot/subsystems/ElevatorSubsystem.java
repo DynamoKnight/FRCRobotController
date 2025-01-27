@@ -4,8 +4,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.*;
-import com.ctre.phoenix6.motorcontrol.ControlMode;
+//import com.ctre.phoenix6.motorcontrol.ControlMode;
 
 public class ElevatorSubsystem extends SubsystemBase{
     public TalonFX backElevator = new TalonFX(14);
@@ -16,29 +19,50 @@ public class ElevatorSubsystem extends SubsystemBase{
     // Indicates if the elevator is in action
     Boolean isRunning = false;
 
-    double motorPower = 0.5;
+    double motorPower = 0.1;
 
     // Initializes the motors and controller
     public ElevatorSubsystem(CommandXboxController controller) {
         this.controller = controller;
+
+        // Configures the motors
+        configureMotor(frontElevator);
+        configureMotor(backElevator);
+    }
+
+    // Configures settings for motor at start
+    private void configureMotor(TalonFX motor) {
+        // Resets to factory defaults
+        motor.getConfigurator().apply(new TalonFXConfiguration());
+        // Ensures the motor power is set to 0
+        motor.setControl(new DutyCycleOut(0));
+        // Sets the current limit
+        var currentConfiguration = new CurrentLimitsConfigs();
+        currentConfiguration.StatorCurrentLimit = 80;
+        currentConfiguration.StatorCurrentLimitEnable = true;
+        // Refreshes and applies the current
+        motor.getConfigurator().refresh(currentConfiguration);
+        motor.getConfigurator().apply(currentConfiguration);
     }
 
     @Override
     public void periodic() {
+        // Retrieve and print telemetry values
+        System.out.println("Front Elevator Duty Cycle: " + frontElevator.getDutyCycle().getValue());
+        System.out.println("Front Elevator Supply Voltage: " + frontElevator.getSupplyVoltage().getValue());
+        System.out.println("Front Elevator Stator Current: " + frontElevator.getStatorCurrent().getValue());
         // Intakes on A button
         if (controller.a().getAsBoolean()) {
-            frontElevator.set(ControlMode.PercentOutput, motorPower);
-            backElevator.set(ControlMode.PercentOutput, motorPower);
+            setMotorPower(motorPower);
         } else {
-            frontElevator.set(ControlMode.PercentOutput, 0);
-            backElevator.set(ControlMode.PercentOutput, 0);
+            setMotorPower(0);
         }
     }
 
     // Sets power of both motors
     public void setMotorPower(double speed){
-        frontElevator.set(ControlMode.PercentOutput, speed);
-        backElevator.set(ControlMode.PercentOutput, speed);
+        frontElevator.setControl(new DutyCycleOut(speed));
+        backElevator.setControl(new DutyCycleOut(speed));
     }
 
     /** Sets the position of both motors.
