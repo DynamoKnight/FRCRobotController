@@ -10,26 +10,28 @@ import com.revrobotics.spark.SparkMax;
 public class DumpRollerSubsystem extends SubsystemBase{
     
     CommandXboxController controller;
-    SparkMax motorController = new SparkMax(1, MotorType.kBrushed);
+    SparkMax coralMotor = new SparkMax(2, MotorType.kBrushless);
     Timer a_timer = new Timer();
     // Indicates if the launcher is in action
     Boolean isRunning = false;
 
-    double intakePower = 0.5;
+    double power = 0.5;
 
     // Initializes the motors and controller
     public DumpRollerSubsystem(CommandXboxController controller) {
         this.controller = controller;
     }
 
+
     @Override
     public void periodic() {
-        // Intakes on A button
-        if (controller.a().getAsBoolean()) {
-            motorController.set(intakePower);
+        // Outakes on Right trigger 
+        if (controller.rightTrigger().getAsBoolean()){
+            System.out.println("DHKEJFNHSKJEFSKJE");
+            coralMotor.set(power);
         }
         else{
-            motorController.set(0);
+            coralMotor.set(0);
         }
     }
 }

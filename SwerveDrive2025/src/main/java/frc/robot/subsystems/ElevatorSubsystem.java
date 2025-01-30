@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.*;
@@ -20,6 +21,7 @@ public class ElevatorSubsystem extends SubsystemBase{
     // Indicates if the elevator is in action
     Boolean isRunning = false;
     // A list of the number of rotations for each reef level
+    private double holdPosition = 0;
     private double[] rotations = {2 ,4, 6, 8};
     private int idx = 0;
     // The speed of the motors
@@ -40,30 +42,52 @@ public class ElevatorSubsystem extends SubsystemBase{
         // Ensures the motor power is set to 0
         motor.setControl(new DutyCycleOut(0));
         // Sets the current limit
-        var currentConfiguration = new CurrentLimitsConfigs();
-        currentConfiguration.StatorCurrentLimit = 80;
-        currentConfiguration.StatorCurrentLimitEnable = true;
+        var currentConfigs = new CurrentLimitsConfigs();
+        currentConfigs.StatorCurrentLimit = 80;
+        currentConfigs.StatorCurrentLimitEnable = true;
         // Refreshes and applies the current
-        motor.getConfigurator().refresh(currentConfiguration);
-        motor.getConfigurator().apply(currentConfiguration);
+        motor.getConfigurator().refresh(currentConfigs);
+        motor.getConfigurator().apply(currentConfigs);
         // Brakes motor when not receiving power
         motor.setNeutralMode(NeutralModeValue.Brake);
+        holdPosition = 0;
+        motor.setPosition(holdPosition);
+
+        // PID Constants
+        // Sets slot 0 gains
+        var slot0Configs = new Slot0Configs();
+        slot0Configs.kP = 2.4; // An error of 1 rotation results in 2.4 V output
+        slot0Configs.kI = 0; // no output for integrated error
+        slot0Configs.kD = 0.1; // A velocity of 1 rps results in 0.1 V output
+        motor.getConfigurator().apply(slot0Configs);
     }
 
     @Override
     public void periodic() {
+        if (controller.a().getAsBoolean()){
+            // Creates a position closed-loop request, voltage output, slot 0 configs
+            final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
+            // Sets position
+            frontElevator.setControl(m_request.withPosition(1));
+            backElevator.setControl(m_request.withPosition(1));
+        }
         // Moves up on dpad up button
         if (controller.povUp().getAsBoolean()) {
             setMotorPower(motorPower);
             //System.out.println(frontElevator.getDutyCycle().getValue()); // Returns the power
+            // Updates the hold position to the current position
+            holdPosition = frontElevator.getPosition().getValueAsDouble();
         }
         // Moves down on dpad down button
         else if (controller.povDown().getAsBoolean()) {
             setMotorPower(-motorPower);
+            holdPosition = frontElevator.getPosition().getValueAsDouble();
         }
         else {
             setMotorPower(0);
+            //setPositions(holdPosition);
         }
+       
     }
 
     // Sets power of both motors
