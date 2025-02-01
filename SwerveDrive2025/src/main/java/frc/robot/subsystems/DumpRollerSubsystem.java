@@ -27,6 +27,7 @@ public class DumpRollerSubsystem extends SubsystemBase{
     public void periodic() {
         // Outakes on Right trigger 
         if (controller.rightTrigger().getAsBoolean()){
+            System.out.println("DHKEJFNHSKJEFSKJE");
             coralMotor.set(power);
         }
         else{
