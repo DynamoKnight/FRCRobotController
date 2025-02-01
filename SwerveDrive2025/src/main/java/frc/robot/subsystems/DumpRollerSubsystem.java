@@ -15,7 +15,7 @@ public class DumpRollerSubsystem extends SubsystemBase{
     // Indicates if the launcher is in action
     Boolean isRunning = false;
 
-    double power = 0.5;
+    double power = 0.3;
 
     // Initializes the motors and controller
     public DumpRollerSubsystem(CommandXboxController controller) {
@@ -27,7 +27,6 @@ public class DumpRollerSubsystem extends SubsystemBase{
     public void periodic() {
         // Outakes on Right trigger 
         if (controller.rightTrigger().getAsBoolean()){
-            System.out.println("DHKEJFNHSKJEFSKJE");
             coralMotor.set(power);
         }
         else{

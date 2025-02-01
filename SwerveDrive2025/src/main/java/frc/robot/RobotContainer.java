@@ -57,14 +57,14 @@ public class RobotContainer {
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
 
-        // Do not change.
+        // DO NOT CHANGE.
         elevator.setDefaultCommand(elevator.setOpenLoop(() -> 0.2));
 
         joystick2.a().onTrue(elevator.setCloseLoop(() -> 5));
-        joystick2.b().onTrue(elevator.setCloseLoop(() -> 10));
+        joystick2.b().onTrue(elevator.setCloseLoop(() -> 9));
 
-        joystick2.x().onTrue(elevator.setCloseLoop(() -> 20));
-        joystick2.y().onTrue(elevator.setCloseLoop(() -> 30));
+        joystick2.x().onTrue(elevator.setCloseLoop(() -> 19));
+        joystick2.y().onTrue(elevator.setCloseLoop(() -> 37));
 
 
 
