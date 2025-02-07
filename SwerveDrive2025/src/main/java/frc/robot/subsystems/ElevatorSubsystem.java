@@ -19,10 +19,12 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class ElevatorSubsystem extends SubsystemBase{
+    // Declares the two motors controling the elevator
     private final TalonFX backElevator = new TalonFX(14, "canivore");
     private final TalonFX frontElevator = new TalonFX(15, "canivore");
-
+    // Defines motionMagic stuff(allows the elevator to move smoothly)
     private final MotionMagicVoltage motionMagic = new MotionMagicVoltage(0).withSlot(0);
+    // Defines a static voltage for the elevator
     private final VoltageOut voltageOut = new VoltageOut(0);
 
     // Initializes the motors and controller
@@ -48,16 +50,15 @@ public class ElevatorSubsystem extends SubsystemBase{
         // Motion Magic
         config.MotionMagic.MotionMagicCruiseVelocity = 100;
         config.MotionMagic.MotionMagicAcceleration = 120;
-
+        // Current limits
         config.CurrentLimits.SupplyCurrentLimit = 40;
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
-
+        // Limits for the height of the elevator
         config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.5;
         config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
         config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 37.5;
-
         config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-
+        // 
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
