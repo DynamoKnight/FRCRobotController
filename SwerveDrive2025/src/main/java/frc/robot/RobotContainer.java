@@ -4,10 +4,12 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -15,15 +17,14 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.DumpRollerSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.LimelightSubsystem;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -40,37 +41,65 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
+    // Joysticks
     private final CommandXboxController joystick = new CommandXboxController(0);
     private final CommandXboxController joystick2 = new CommandXboxController(1);
 
+    // Subsystems
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final ElevatorSubsystem elevator = new ElevatorSubsystem(joystick2);
     public final DumpRollerSubsystem dumpRoller = new DumpRollerSubsystem(joystick2);
+
+    public LimelightSubsystem limelight = new LimelightSubsystem(this);
+
+     // Represents a list of the number of rotations to get to each level
+     Double[] positions = {0.5, 9.0, 19.5, 38.0};
+     int pos = 0;
 
     /* Path follower */
     private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
         // Creates a Named Command, that can be accessed in path planner5
-        NamedCommands.registerCommand("score",Commands.runOnce(()->{System.out.println("I have scored");}));
+        NamedCommands.registerCommand("Raise L4", elevator.setCloseLoop(() -> 38).until(() -> Math.abs(38 - elevator.getPosition()) < 0.5));
+        NamedCommands.registerCommand("Score L4", dumpRoller.dropCoral(0.2).withTimeout(0.5));
+        NamedCommands.registerCommand("Lower", elevator.setCloseLoop(() -> 0.5).until(() -> Math.abs(0.5 - elevator.getPosition()) < 0.5));
         // Adds an auto
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
 
         // DO NOT CHANGE.
         elevator.setDefaultCommand(elevator.setOpenLoop(() -> 0.2));
-
-        joystick2.a().onTrue(elevator.setCloseLoop(() -> 5));
-        joystick2.b().onTrue(elevator.setCloseLoop(() -> 9));
-
-        joystick2.x().onTrue(elevator.setCloseLoop(() -> 19));
-        joystick2.y().onTrue(elevator.setCloseLoop(() -> 37));
-
-
+        dumpRoller.setDefaultCommand(dumpRoller.keepCoral());
+        // Toggle Elevator Positions
+        // Level 1
+        joystick2.b().onTrue(elevator.setCloseLoop(() -> positions[0]));
+        // Level 2
+        joystick2.a().onTrue(elevator.setCloseLoop(() -> positions[1]));
+        // Level 3
+        joystick2.x().onTrue(elevator.setCloseLoop(() -> positions[2]));
+        // Level 4
+        joystick2.y().onTrue(elevator.setCloseLoop(() -> positions[3]));
+        // Outtakes coral
+        joystick2.rightTrigger().onTrue(ToggleCoralOuttake());
 
         configureBindings();
     }
 
+    // Sets different powers for different levels
+    private Command ToggleCoralOuttake(){
+        // Level 1 outake
+        if (pos == 0){
+            return dumpRoller.dropCoral(0.15).withTimeout(0.5);
+        }
+        // Levels 2, 3, 4 outtake
+        else{
+            // Drops to Level 1 after done
+            return dumpRoller.dropCoral(0.2).withTimeout(2).andThen(elevator.setCloseLoop(() -> positions[0]));
+        }
+        
+    }
+    // Configures the bindings
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
