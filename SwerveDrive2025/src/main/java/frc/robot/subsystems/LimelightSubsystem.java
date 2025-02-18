@@ -13,31 +13,35 @@ import frc.robot.RobotContainer;
 
 public class LimelightSubsystem extends SubsystemBase {
     // Limelight Data table
-    NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
+    NetworkTable limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
 
     // Basic targeting data
 
     // The ID of the targetted AprilTag
     double tid = LimelightHelpers.getFiducialID("limelight");
     // Horizontal offset from crosshair to target in degrees
-    NetworkTableEntry tx = limelight.getEntry("tx");
+    NetworkTableEntry tx = limelightTable.getEntry("tx");
     // Vertical offset from crosshair to target in degrees
-    NetworkTableEntry ty = limelight.getEntry("ty");
+    NetworkTableEntry ty = limelightTable.getEntry("ty");
     // Target area (0% to 100% of image)
-    NetworkTableEntry ta = limelight.getEntry("ta");
+    NetworkTableEntry ta = limelightTable.getEntry("ta");
 
-    // A list X, Y, Z, Roll, Pitch, Yaw
-    NetworkTableEntry botPose = limelight.getEntry("botpose_targetspace");
-    NetworkTableEntry botPoseFieldBlue = limelight.getEntry("botpose_wpiblue");
-    NetworkTableEntry activePipeline = limelight.getEntry("getpipe");
-    NetworkTableEntry pipelineToSet = limelight.getEntry("pipeline");
+    // A list of the robot's position relative to the april tag [tx, ty, tz, Pitch, Yaw, Roll]
+    NetworkTableEntry botPose = limelightTable.getEntry("botpose_targetspace");
+    // A  list of the robot's position relative to the field from the Blue alliance
+    // [X, Y, Z, Roll, Pitch, Yaw, Latency, Tag Count, Tag Span, Avg Tag Distance, and Avg Tag Area]
+    NetworkTableEntry botPoseFieldBlue = limelightTable.getEntry("botpose_wpiblue");
+    // The current pipeline index
+    NetworkTableEntry activePipeline = limelightTable.getEntry("getpipe");
+    // Allows pipeline to be set
+    NetworkTableEntry pipelineToSet = limelightTable.getEntry("pipeline");
 
     // Do you have a valid target?
     boolean hasTarget = LimelightHelpers.getTV("limelight");
-    // Horizontal offset from principal pixel/point to target in degrees
-    NetworkTableEntry txnc = limelight.getEntry("txnc");
-    // Vertical offset from principal pixel/point to target in degrees
-    NetworkTableEntry tync = limelight.getEntry("tync");
+    // Horizontal offset from principal pixel to target in degrees
+    NetworkTableEntry txnc = limelightTable.getEntry("txnc");
+    // Vertical offset from principal pixel to target in degrees
+    NetworkTableEntry tync = limelightTable.getEntry("tync");
 
     // Indicates if limelight is being used
     private final boolean kUseLimelight = false;
@@ -72,17 +76,47 @@ public class LimelightSubsystem extends SubsystemBase {
                 m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, Utils.fpgaToCurrentTime(llMeasurement.timestampSeconds));
             }
 
+            // The parameter inside getDouble or getDoubleArray is what is returned if nothing is found
             SmartDashboard.putNumber("limelight tx", tx.getDouble(0));
             SmartDashboard.putNumber("limelight yaw", getYaw());
             SmartDashboard.putNumber("limelight ta", ta.getDouble(0));
         }
     }
+    
+    // Returns the bot pose list
+    public double[] getBotPose(){
+        return botPose.getDoubleArray(new double[6]);
+    }
 
+    // Returns the Yaw of the robot from the april tag
     public double getYaw() {
-        // getDoubleArray returns the botPose as a list of doubles
-        // The yaw is in the 4th element
-        // The parameter is what it returns if nothing is found, in this case an empty list
-        return botPose.getDoubleArray(new double[6])[4];
+        return getBotPose()[4];
+    }
+
+    public double getTx() {
+        return tx.getDouble(0);
+    }
+
+    public double getTa() {
+        return ta.getDouble(0);
+    }
+
+    public int getTid() {
+        return (int) tid.getDouble(0);
+    }
+
+    public double getTagCount() {
+        return poseArray[7];
+    }
+
+    public Pose2d getPose() {
+        Rotation2d rot = new Rotation2d(poseArray[5] * Math.PI / 180);
+        Pose2d out = new Pose2d(poseArray[0], poseArray[1], rot);
+        return out;
+    }
+
+    public int getActivePipeline() {
+        return (int)activePipeline.getDouble(2);
     }
 
     
