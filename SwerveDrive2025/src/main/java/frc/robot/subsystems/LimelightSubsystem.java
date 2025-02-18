@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.Utils;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -18,7 +20,7 @@ public class LimelightSubsystem extends SubsystemBase {
     // Basic targeting data
 
     // The ID of the targetted AprilTag
-    double tid = LimelightHelpers.getFiducialID("limelight");
+    NetworkTableEntry tid = limelightTable.getEntry("tid");
     // Horizontal offset from crosshair to target in degrees
     NetworkTableEntry tx = limelightTable.getEntry("tx");
     // Vertical offset from crosshair to target in degrees
@@ -83,12 +85,17 @@ public class LimelightSubsystem extends SubsystemBase {
         }
     }
     
-    // Returns the bot pose list
+    // Returns the botPose list
     public double[] getBotPose(){
         return botPose.getDoubleArray(new double[6]);
     }
 
-    // Returns the Yaw of the robot from the april tag
+    // Returns the botPoseFieldBlue list
+    public double[] getBotPoseFieldBlue(){
+        return botPoseFieldBlue.getDoubleArray(new double[11]);
+    }
+
+    // Returns the Yaw of the robot
     public double getYaw() {
         return getBotPose()[4];
     }
@@ -106,17 +113,17 @@ public class LimelightSubsystem extends SubsystemBase {
     }
 
     public double getTagCount() {
-        return poseArray[7];
+        return getBotPoseFieldBlue()[7];
     }
 
     public Pose2d getPose() {
-        Rotation2d rot = new Rotation2d(poseArray[5] * Math.PI / 180);
-        Pose2d out = new Pose2d(poseArray[0], poseArray[1], rot);
+        Rotation2d rot = new Rotation2d(getBotPoseFieldBlue()[5] * Math.PI / 180);
+        Pose2d out = new Pose2d(getBotPoseFieldBlue()[0], getBotPoseFieldBlue()[1], rot);
         return out;
     }
 
     public int getActivePipeline() {
-        return (int)activePipeline.getDouble(2);
+        return (int) activePipeline.getDouble(0);
     }
 
     
