@@ -3,21 +3,41 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.Utils;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 import frc.robot.RobotContainer;
 
 public class LimelightSubsystem extends SubsystemBase {
-    // Basic targeting data
-    double tx = LimelightHelpers.getTX("limelight");  // Horizontal offset from crosshair to target in degrees
-    double ty = LimelightHelpers.getTY("limelight");  // Vertical offset from crosshair to target in degrees
-    double ta = LimelightHelpers.getTA("limelight");  // Target area (0% to 100% of image)
-    boolean hasTarget = LimelightHelpers.getTV("limelight"); // Do you have a valid target?
+    // Limelight Data table
+    NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
 
-    //NetworkTableEntry tid = limelight.getEntry("tid");
-    double txnc = LimelightHelpers.getTXNC("limelight");  // Horizontal offset from principal pixel/point to target in degrees
-    double tync = LimelightHelpers.getTYNC("limelight");  // Vertical  offset from principal pixel/point to target in degrees
+    // Basic targeting data
+
+    // The ID of the targetted AprilTag
+    double tid = LimelightHelpers.getFiducialID("limelight");
+    // Horizontal offset from crosshair to target in degrees
+    NetworkTableEntry tx = limelight.getEntry("tx");
+    // Vertical offset from crosshair to target in degrees
+    NetworkTableEntry ty = limelight.getEntry("ty");
+    // Target area (0% to 100% of image)
+    NetworkTableEntry ta = limelight.getEntry("ta");
+
+    // A list X, Y, Z, Roll, Pitch, Yaw
+    NetworkTableEntry botPose = limelight.getEntry("botpose_targetspace");
+    NetworkTableEntry botPoseFieldBlue = limelight.getEntry("botpose_wpiblue");
+    NetworkTableEntry activePipeline = limelight.getEntry("getpipe");
+    NetworkTableEntry pipelineToSet = limelight.getEntry("pipeline");
+
+    // Do you have a valid target?
+    boolean hasTarget = LimelightHelpers.getTV("limelight");
+    // Horizontal offset from principal pixel/point to target in degrees
+    NetworkTableEntry txnc = limelight.getEntry("txnc");
+    // Vertical offset from principal pixel/point to target in degrees
+    NetworkTableEntry tync = limelight.getEntry("tync");
 
     // Indicates if limelight is being used
     private final boolean kUseLimelight = false;
@@ -36,6 +56,7 @@ public class LimelightSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // If Limelight is in use
         if (kUseLimelight) {
             // Returns the robot's current state(position, orientation, and velocity)
             var driveState = m_robotContainer.drivetrain.getState();
@@ -50,7 +71,18 @@ public class LimelightSubsystem extends SubsystemBase {
                 // Adds the limelight pose estimate to the drivetrain's odometry calculation
                 m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, Utils.fpgaToCurrentTime(llMeasurement.timestampSeconds));
             }
+
+            SmartDashboard.putNumber("limelight tx", tx.getDouble(0));
+            SmartDashboard.putNumber("limelight yaw", getYaw());
+            SmartDashboard.putNumber("limelight ta", ta.getDouble(0));
         }
+    }
+
+    public double getYaw() {
+        // getDoubleArray returns the botPose as a list of doubles
+        // The yaw is in the 4th element
+        // The parameter is what it returns if nothing is found, in this case an empty list
+        return botPose.getDoubleArray(new double[6])[4];
     }
 
     

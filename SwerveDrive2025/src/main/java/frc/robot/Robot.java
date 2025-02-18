@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.Optional;
+
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
@@ -11,9 +13,12 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import com.ctre.phoenix6.Utils;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants.*;
 
 public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
@@ -92,4 +97,24 @@ public class Robot extends LoggedRobot {
   public RobotContainer getRobotContainer(){
     return m_robotContainer;
   }
+
+  // Returns Alliance color
+  public Alliance getAllianceColor(){
+    // The DriverStation class has information from the DS computer
+    Optional<Alliance> ally = DriverStation.getAlliance();
+    // The alliance needs to be set
+    if (ally.isPresent()){
+      // Red alliance
+      if (ally.get() == Alliance.Red) {
+        return Alliance.Red;
+      }
+      // Blue alliance
+      if (ally.get() == Alliance.Blue) {
+        return Alliance.Blue;
+      }
+    }
+    // Else, no color was set, assume Blue
+    return Alliance.Blue;
+  }
+
 }
