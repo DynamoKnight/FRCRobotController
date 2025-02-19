@@ -52,7 +52,7 @@ public class RobotContainer {
     public LimelightSubsystem limelight = new LimelightSubsystem(this);
 
      // Represents a list of the number of rotations to get to each level
-     Double[] positions = {0.5, 9.0, 19.5, 38.0};
+     Double[] positions = {0.5, 10.5, 21.0, 39.0};
      int pos = 0;
 
     /* Path follower */
