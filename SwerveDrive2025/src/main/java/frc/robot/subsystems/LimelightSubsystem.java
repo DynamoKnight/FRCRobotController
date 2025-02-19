@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.HashMap;
+
 import com.ctre.phoenix6.Utils;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -57,6 +59,8 @@ public class LimelightSubsystem extends SubsystemBase {
         // Sets LED settings
         LimelightHelpers.setLEDMode_PipelineControl("limelight");
         LimelightHelpers.setLEDMode_ForceOn("limelight");
+
+        // The Robot Container is needed to access the Drivetrain
         this.m_robotContainer = m_robotContainer;
     }
 
@@ -70,7 +74,7 @@ public class LimelightSubsystem extends SubsystemBase {
             double headingDeg = driveState.Pose.getRotation().getDegrees();
             // Converts the robot's angular velocity from radians to rotations per second
             double omegaRps = Units.radiansToRotations(driveState.Speeds.omegaRadiansPerSecond);
-    
+            
             LimelightHelpers.SetRobotOrientation("limelight", headingDeg, 0, 0, 0, 0, 0);
             var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
             if (llMeasurement != null && llMeasurement.tagCount > 0 && omegaRps < 2.0) {
@@ -78,6 +82,7 @@ public class LimelightSubsystem extends SubsystemBase {
                 m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, Utils.fpgaToCurrentTime(llMeasurement.timestampSeconds));
             }
 
+            // Posts data to SmartDashboard
             // The parameter inside getDouble or getDoubleArray is what is returned if nothing is found
             SmartDashboard.putNumber("limelight tx", tx.getDouble(0));
             SmartDashboard.putNumber("limelight yaw", getYaw());

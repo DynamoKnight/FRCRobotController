@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.commands.AlignReef;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.DumpRollerSubsystem;
@@ -48,8 +49,7 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final ElevatorSubsystem elevator = new ElevatorSubsystem(joystick2);
     public final DumpRollerSubsystem dumpRoller = new DumpRollerSubsystem(joystick2);
-
-    public LimelightSubsystem limelight = new LimelightSubsystem(this);
+    public final LimelightSubsystem limelight = new LimelightSubsystem(this);
 
      // Represents a list of the number of rotations to get to each level
      Double[] positions = {0.5, 10.5, 21.0, 39.0};
@@ -68,6 +68,7 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Mode", autoChooser);
 
         // DO NOT CHANGE.
+        // Open Loop doesn't use feedback, Close Loop uses feedback
         elevator.setDefaultCommand(elevator.setOpenLoop(() -> 0.2));
         dumpRoller.setDefaultCommand(dumpRoller.keepCoral());
         // Toggle Elevator Positions
@@ -81,6 +82,9 @@ public class RobotContainer {
         joystick2.y().onTrue(elevator.setCloseLoop(() -> positions[3]));
         // Outtakes coral
         joystick2.rightTrigger().onTrue(ToggleCoralOuttake());
+
+        // Aligns to the april tag
+        joystick2.rightBumper().onTrue(new AlignReef(this));
 
         configureBindings();
     }
