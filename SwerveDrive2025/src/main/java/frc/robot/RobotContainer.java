@@ -81,7 +81,7 @@ public class RobotContainer {
         // Level 4
         joystick2.y().onTrue(elevator.setCloseLoop(() -> positions[3]));
         // Outtakes coral
-        joystick2.rightTrigger().onTrue(ToggleCoralOuttake());
+        joystick2.rightTrigger().onTrue(ToggleCoralOuttake().andThen(elevator.setCloseLoop(() -> positions[0])));
 
         // Aligns to the april tag
         joystick2.rightBumper().onTrue(new AlignReef(this));
