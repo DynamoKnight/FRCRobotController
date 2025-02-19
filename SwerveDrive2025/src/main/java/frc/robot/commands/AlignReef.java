@@ -37,11 +37,14 @@ public class AlignReef extends Command{
     private final double speed = 0.2;
     // The tolerance before stopping align (meters)
     private final double positionTolerance = 0.1;
+    // The tolerance for yaw alignment (degrees)
+    private final double yawTolerance = 2.0;
 
     // CONSTRUCTOR
     public AlignReef(RobotContainer robotContainer){
         this.drivetrain = robotContainer.drivetrain;
         this.limelight = robotContainer.limelight;
+        this.targetPose = robotContainer.targetPose;
     }
 
     @Override
@@ -67,8 +70,9 @@ public class AlignReef extends Command{
         Translation2d error = targetPose.getTranslation().minus(currentPose.getTranslation());
         // Finds the hypotenuse distance to the desired point
         double distance = error.getNorm();
+        double yawError = limelight.getTx(); // This gets the hoz offset from the target
         SmartDashboard.putNumber("Distance Error", distance);
-        // If the robot is still outside the tolerance, it will continue to correct itself
+
         if (distance > positionTolerance) {
             // Normalizes the error vector into a unit vector (value between -1 to 1) and applies the speed
             // The error vector represent both the direction and magnitude as the same. 
@@ -78,12 +82,20 @@ public class AlignReef extends Command{
             drivetrain.setControl(
                 driveRequest.withVelocityX(velocityX).withVelocityY(velocityY).withRotationalRate(0)
             );
-        }
-        // The robot is inside the tolerance
-        else {
+        } else if (Math.abs(yawError) > yawTolerance) {
+            double rotationControl = calculateRotationControl(yawError);
+            drivetrain.setControl(
+                driveRequest.withVelocityX(0).withVelocityY(0).withRotationalRate(rotationControl)
+            );
+        } else {
             // Stops
             drivetrain.setControl(stop);
         }
+    }
+
+    private double calculateRotationControl(double yawError) {
+        double rotationSpeed = 0.1; // Set as this for now
+        return Math.signum(yawError) * rotationSpeed; // This makes sure that the robot turns in the right direction
     }
 
     @Override
