@@ -34,9 +34,9 @@ public class AlignReef extends Command{
     // The Desired position to go to
     private Pose2d targetPose;
     // The speed to move to position
-    private final double speed = 0.5;
-    // The speed to rotate to position
-    private final double rotationSpeed = 0.8;
+    private final double speed = 0.3;
+    // The speed (rad/s) to rotate to position
+    private final double rotationSpeed = 0.5;
     // The tolerance before stopping align (meters)
     private final double positionTolerance = 0.1;
     // The tolerance for yaw alignment (degrees)
@@ -47,7 +47,7 @@ public class AlignReef extends Command{
         this.drivetrain = robotContainer.drivetrain;
         this.limelight = robotContainer.limelight;
     }
-
+    
     @Override
     public void initialize(){
         timer.restart();
@@ -71,7 +71,8 @@ public class AlignReef extends Command{
         Translation2d error = targetPose.getTranslation().minus(currentPose.getTranslation());
         // Finds the hypotenuse distance to the desired point
         double distance = error.getNorm();
-        double yawError = limelight.getTx(); // This gets the hoz offset from the target
+        // This gets the hoz offset from the target
+        double yawError = limelight.getTx();
         SmartDashboard.putNumber("Distance Error", distance);
 
         double velocityX = 0.0;
@@ -83,42 +84,38 @@ public class AlignReef extends Command{
             // The error vector represent both the direction and magnitude as the same. 
             velocityX = (error.getX() / distance) * speed;
             velocityY = (error.getY() / distance) * speed;
-            // Moves the drivetrain
-            drivetrain.setControl(
-                driveRequest.withVelocityX(velocityX).withVelocityY(velocityY).withRotationalRate(rotationControl)
-            );
         } 
         else {
-            // Stops movement
-            drivetrain.setControl(
-                driveRequest.withVelocityX(0).withVelocityY(0).withRotationalRate(rotationControl)
-            ); 
+            // Wont move if within tolerance
+            velocityX = 0;
+            velocityY = 0;
         }
         // Rotational Correction
         if (Math.abs(yawError) > yawTolerance) {
             rotationControl = calculateRotationControl(yawError);
-            drivetrain.setControl(
-                driveRequest.withVelocityX(velocityX).withVelocityY(velocityY).withRotationalRate(rotationControl)
-            );
         } 
         else {
-            // Stops rotation
-            drivetrain.setControl(
-                driveRequest.withVelocityX(velocityX).withVelocityY(velocityY).withRotationalRate(0)
-            );
+            // Wont rotate if within tolerance
+            rotationControl = 0;
         }
+
+        // Moves the drivetrain
+        drivetrain.setControl(
+            driveRequest.withVelocityX(-velocityX).withVelocityY(-velocityY).withRotationalRate(-rotationControl)
+        );
     }
 
+    // Returns the direction of the rotation speed
     private double calculateRotationControl(double yawError) {
-        return Math.signum(yawError) * rotationSpeed; // This makes sure that the robot turns in the right direction
+        return Math.signum(yawError) * rotationSpeed;
     }
 
     @Override
     public boolean isFinished(){
         Pose2d currentPose = drivetrain.getState().Pose;
         double distance = targetPose.getTranslation().getDistance(currentPose.getTranslation());
-
-        double yawError = limelight.getTx(); // This gets the hoz offset from the target
+        // This gets the hoz offset from the target
+        double yawError = limelight.getTx();
 
         // Ends once robot is within tolerance
         return distance <= positionTolerance && Math.abs(yawError) <= yawTolerance;

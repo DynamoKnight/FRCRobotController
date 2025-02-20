@@ -84,7 +84,7 @@ public class RobotContainer {
         joystick2.rightTrigger().onTrue(ToggleCoralOuttake().andThen(elevator.setCloseLoop(() -> positions[0])));
 
         // Aligns to the april tag
-        joystick2.rightBumper().onTrue(new AlignReef(this));
+        joystick2.rightBumper().whileTrue(new AlignReef(this));
 
         configureBindings();
     }
