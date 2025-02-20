@@ -62,6 +62,10 @@ public class AlignReef extends Command{
         timer.restart();
         // Gets the tag ID that is being targetted
         int tID = limelight.getTid();
+        if (tID == null) {
+            System.out.println("Error: Tag ID is null.");
+            end(true); // End the command if tID is null
+            return;
         // Gets the position of the april tag
         double[] targetPoseArray = Constants.AprilTagMaps.aprilTagMap.get(tID);
         // Checks if the tag exists within the list of all tags
