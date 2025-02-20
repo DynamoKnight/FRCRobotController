@@ -58,7 +58,8 @@ public class LimelightSubsystem extends SubsystemBase {
         LimelightHelpers.setPipelineIndex("limelight", 0);
         // Sets LED settings
         LimelightHelpers.setLEDMode_PipelineControl("limelight");
-        LimelightHelpers.setLEDMode_ForceOn("limelight");
+        // Turns Light off
+        LimelightHelpers.setLEDMode_ForceOff("limelight");
 
         // The Robot Container is needed to access the Drivetrain
         this.m_robotContainer = m_robotContainer;

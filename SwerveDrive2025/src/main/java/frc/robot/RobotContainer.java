@@ -71,21 +71,8 @@ public class RobotContainer {
         // Open Loop doesn't use feedback, Close Loop uses feedback
         elevator.setDefaultCommand(elevator.setOpenLoop(() -> 0.2));
         dumpRoller.setDefaultCommand(dumpRoller.keepCoral());
-        // Toggle Elevator Positions
-        // Level 1
-        joystick2.b().onTrue(elevator.setCloseLoop(() -> positions[0]));
-        // Level 2
-        joystick2.a().onTrue(elevator.setCloseLoop(() -> positions[1]));
-        // Level 3
-        joystick2.x().onTrue(elevator.setCloseLoop(() -> positions[2]));
-        // Level 4
-        joystick2.y().onTrue(elevator.setCloseLoop(() -> positions[3]));
-        // Outtakes coral
-        joystick2.rightTrigger().onTrue(ToggleCoralOuttake().andThen(elevator.setCloseLoop(() -> positions[0])));
 
-        // Aligns to the april tag
-        joystick2.rightBumper().whileTrue(new AlignReef(this));
-
+        // Configures the Bindings
         configureBindings();
     }
 
@@ -104,6 +91,9 @@ public class RobotContainer {
     }
     // Configures the bindings
     private void configureBindings() {
+        /////////////////////////////
+        // DRIVER CONTROL
+        /////////////////////////////
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
@@ -138,6 +128,25 @@ public class RobotContainer {
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        /////////////////////////////
+        // OPERATOR CONTROL
+        /////////////////////////////
+        // Toggle Elevator Positions
+        // Level 1
+        joystick2.b().onTrue(elevator.setCloseLoop(() -> positions[0]));
+        // Level 2
+        joystick2.a().onTrue(elevator.setCloseLoop(() -> positions[1]));
+        // Level 3
+        joystick2.x().onTrue(elevator.setCloseLoop(() -> positions[2]));
+        // Level 4
+        joystick2.y().onTrue(elevator.setCloseLoop(() -> positions[3]));
+        // Outtakes coral
+        joystick2.rightTrigger().onTrue(ToggleCoralOuttake().andThen(elevator.setCloseLoop(() -> positions[0])));
+
+        // Aligns to the april tag
+        // Command ends once right bumper released
+        joystick2.rightBumper().whileTrue(new AlignReef(this));
     }
 
     public Command getAutonomousCommand() {

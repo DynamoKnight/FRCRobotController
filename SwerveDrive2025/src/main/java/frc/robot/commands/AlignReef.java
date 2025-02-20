@@ -7,8 +7,12 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimelightSubsystem;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+
+import java.util.Objects;
+
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -23,7 +27,10 @@ public class AlignReef extends Command{
 
     Timer timer = new Timer();
 
-    //private PIDController pidX = new PIDController(3, 0, 0);
+    /* ----- PIDs ----- */
+    private PIDController pidX = new PIDController(3, 0, 0);
+    private PIDController pidY = new PIDController(3, 0, 0);
+    private PIDController pidRotate = new PIDController(4, 0, 0);
 
     // Creates a swerve request that specifies the robot to move FieldCentric
     private final SwerveRequest.FieldCentric driveRequest = new SwerveRequest.FieldCentric()
@@ -46,6 +53,8 @@ public class AlignReef extends Command{
     public AlignReef(RobotContainer robotContainer){
         this.drivetrain = robotContainer.drivetrain;
         this.limelight = robotContainer.limelight;
+
+        pidRotate.enableContinuousInput(-Math.PI, Math.PI);
     }
     
     @Override
@@ -55,13 +64,21 @@ public class AlignReef extends Command{
         int tID = limelight.getTid();
         // Gets the position of the april tag
         double[] targetPoseArray = Constants.AprilTagMaps.aprilTagMap.get(tID);
+        // Checks if the tag exists within the list of all tags
+        if (targetPoseArray == null) {
+            System.out.println("Error: Target pose array is null for Tag ID: " + tID);
+            end(true); // End the command if targetPoseArray is null
+            return;
+        }
         // Creates a Pose2d for the target position, converts inches to meters
         targetPose = new Pose2d(targetPoseArray[0] * Constants.inToM, targetPoseArray[1] * Constants.inToM, drivetrain.getState().Pose.getRotation());
 
-        SmartDashboard.putNumber("Tag ID", tID);
+        // Sets the destination to go to
+        /*pidX.setSetpoint(1.52);
+        pidY.setSetpoint(6.05);
+        pidRotate.setSetpoint(122.0 * Math.PI / 180.0);*/
 
-        //pidX.setSetpoint(1);
-        //pidX.calculate(currentPose.getX())
+        SmartDashboard.putNumber("Tag ID", tID);
     }
 
     @Override
@@ -74,10 +91,32 @@ public class AlignReef extends Command{
         // This gets the hoz offset from the target
         double yawError = limelight.getTx();
         SmartDashboard.putNumber("Distance Error", distance);
-
+        SmartDashboard.putNumber("X Error", error.getX());
+        SmartDashboard.putNumber("Y Error", error.getY());
+        // Intitializes rotation rates
         double velocityX = 0.0;
         double velocityY = 0.0;
         double rotationControl = 0.0;
+
+        /*// Calculate the power for X direction and clamp it between -1 and 1
+        double powerX = pidX.calculate(currentPose.getX());
+        powerX = MathUtil.clamp(powerX, -1, 1);
+        
+        // Calculate the power for Y direction and clamp it between -1 and 1
+        double powerY = pidY.calculate(pose.getY());
+        powerY = MathUtil.clamp(powerY, -1, 1);
+
+        Logger.recordOutput("Reefscape/Limelight/x error", pidX.getError());
+        Logger.recordOutput("Reefscape/Limelight/y error", pidY.getError());
+
+        // Calculate the rotational power and clamp it between -2 and 2
+        double powerRotate = pidRotate.calculate(pose.getRotation().getRadians());
+        powerRotate = MathUtil.clamp(powerRotate, -2, 2);
+
+        // Moves the drivetrain
+        drivetrain.setControl(driveRequest.withVelocityX(powerX).withVelocityY(powerY).withRotationalRate(powerRotate));
+        */
+
         // Movement Correction
         if (distance > positionTolerance) {
             // Normalizes the error vector into a unit vector (value between -1 to 1) and applies the speed
@@ -101,6 +140,7 @@ public class AlignReef extends Command{
 
         // Moves the drivetrain
         drivetrain.setControl(
+            // Negative for some reason?
             driveRequest.withVelocityX(-velocityX).withVelocityY(-velocityY).withRotationalRate(-rotationControl)
         );
     }
