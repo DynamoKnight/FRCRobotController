@@ -62,10 +62,6 @@ public class AlignReef extends Command{
         timer.restart();
         // Gets the tag ID that is being targetted
         int tID = limelight.getTid();
-        if (tID == null) {
-            System.out.println("Error: Tag ID is null.");
-            end(true); // End the command if tID is null
-            return;
         // Gets the position of the april tag
         double[] targetPoseArray = Constants.AprilTagMaps.aprilTagMap.get(tID);
         // Checks if the tag exists within the list of all tags
@@ -77,8 +73,8 @@ public class AlignReef extends Command{
         // Creates a Pose2d for the target position, converts inches to meters
         targetPose = new Pose2d(targetPoseArray[0] * Constants.inToM, targetPoseArray[1] * Constants.inToM, drivetrain.getState().Pose.getRotation());
 
-        // Sets the destination to go to
-        /*pidX.setSetpoint(1.52);
+        /*// Sets the destination to go to
+        pidX.setSetpoint(1.52);
         pidY.setSetpoint(6.05);
         pidRotate.setSetpoint(122.0 * Math.PI / 180.0);*/
 
