@@ -64,7 +64,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("Score L4", dumpRoller.dropCoral(0.2).withTimeout(0.5));
         NamedCommands.registerCommand("Lower", elevator.setCloseLoop(() -> 0.5).until(() -> Math.abs(0.5 - elevator.getPosition()) < 0.5));
         NamedCommands.registerCommand("Align", new AlignReef(this));
-        // Adds an auto
+        // Adds an auto]\[]
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
 
