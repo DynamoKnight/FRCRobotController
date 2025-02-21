@@ -60,9 +60,10 @@ public class RobotContainer {
 
     public RobotContainer() {
         // Creates a Named Command, that can be accessed in path planner5
-        NamedCommands.registerCommand("Raise L4", elevator.setCloseLoop(() -> 38).until(() -> Math.abs(38 - elevator.getPosition()) < 0.5));
+        NamedCommands.registerCommand("Raise L4", elevator.setCloseLoop(() -> 39).until(() -> Math.abs(39 - elevator.getPosition()) < 0.5));
         NamedCommands.registerCommand("Score L4", dumpRoller.dropCoral(0.2).withTimeout(0.5));
         NamedCommands.registerCommand("Lower", elevator.setCloseLoop(() -> 0.5).until(() -> Math.abs(0.5 - elevator.getPosition()) < 0.5));
+        NamedCommands.registerCommand("Align", new AlignReef(this));
         // Adds an auto
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
@@ -85,10 +86,17 @@ public class RobotContainer {
         // Levels 2, 3, 4 outtake
         else{
             // Drops to Level 1 after done
-            return dumpRoller.dropCoral(0.2).withTimeout(2).andThen(elevator.setCloseLoop(() -> positions[0]));
+            return dumpRoller.dropCoral(0.2).withTimeout(2).andThen(setPosition(0));
         }
         
     }
+
+    // Moves the elevator to the position based on the list
+    private Command setPosition(int pos){
+        this.pos = pos;
+        return elevator.setCloseLoop(() -> positions[pos]);
+    }
+
     // Configures the bindings
     private void configureBindings() {
         /////////////////////////////
@@ -134,15 +142,15 @@ public class RobotContainer {
         /////////////////////////////
         // Toggle Elevator Positions
         // Level 1
-        joystick2.b().onTrue(elevator.setCloseLoop(() -> positions[0]));
+        joystick2.b().onTrue(setPosition(0));
         // Level 2
-        joystick2.a().onTrue(elevator.setCloseLoop(() -> positions[1]));
+        joystick2.a().onTrue(setPosition(1));
         // Level 3
-        joystick2.x().onTrue(elevator.setCloseLoop(() -> positions[2]));
+        joystick2.x().onTrue(setPosition(2));
         // Level 4
-        joystick2.y().onTrue(elevator.setCloseLoop(() -> positions[3]));
+        joystick2.y().onTrue(setPosition(3));
         // Outtakes coral
-        joystick2.rightTrigger().onTrue(ToggleCoralOuttake().andThen(elevator.setCloseLoop(() -> positions[0])));
+        joystick2.rightTrigger().onTrue(ToggleCoralOuttake().withTimeout(0.5));
 
         // Aligns to the april tag
         // Command ends once right bumper released
