@@ -47,7 +47,7 @@
             config.Slot0.kI = 0;        
             config.Slot0.kD = 0;   
             // Feedforward
-            config.Slot0.kG = 0.2;        
+            config.Slot0.kG = 0.4;        
             config.Slot0.kS = 0.2;
             config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
             // Motion Magic

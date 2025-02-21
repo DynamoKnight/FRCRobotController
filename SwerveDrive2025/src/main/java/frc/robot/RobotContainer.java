@@ -146,7 +146,7 @@ public class RobotContainer {
 
         // Aligns to the april tag
         // Command ends once right bumper released
-        joystick2.rightBumper().whileTrue(new AlignReef(this));
+        joystick.rightBumper().whileTrue(new AlignReef(this));
     }
 
     public Command getAutonomousCommand() {

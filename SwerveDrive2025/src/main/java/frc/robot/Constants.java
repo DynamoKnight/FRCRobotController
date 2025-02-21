@@ -15,6 +15,7 @@ public final class Constants {
 
     // Holds all the positions of the April Tags
     public class AprilTagMaps {
+        // Field Map Source: https://firstfrc.blob.core.windows.net/frc2025/FieldAssets/2025FieldDrawings-FieldLayoutAndMarking.pdf
         // A HashMap of April Tag positions: Key = ID, Value = [X, Y, Z, Yaw, Pitch]
         public static final HashMap<Integer, double[]> aprilTagMap = new HashMap<>();
         static {
@@ -43,16 +44,6 @@ public final class Constants {
             aprilTagMap.put(20, new double[]{193.10, 186.83, 12.13, 60.0, 0.0});
             aprilTagMap.put(21, new double[]{209.49, 158.50, 12.13, 0.0, 0.0});
             aprilTagMap.put(22, new double[]{193.10, 130.17, 12.13, 300.0, 0.0});
-        }
-        // Field Map Source: https://firstfrc.blob.core.windows.net/frc2025/FieldAssets/2025FieldDrawings-FieldLayoutAndMarking.pdf
-
-        // A HashMap of target positions for the April Tags: Key = ID, Value = [X, Y, Yaw]
-        public static final HashMap<Integer, double[]> targetPositions = new HashMap<>();
-        static {
-            // Points are in meters, Angles are in degrees
-            aprilTagMap.put(17, new double[]{});
-            aprilTagMap.put(18, new double[]{});
-            aprilTagMap.put(19, new double[]{});
         }
     }
 
