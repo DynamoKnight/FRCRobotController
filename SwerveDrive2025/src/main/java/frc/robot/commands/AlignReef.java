@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.LimelightHelpers;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimelightSubsystem;
@@ -54,6 +55,8 @@ public class AlignReef extends Command{
     // Previous Position 18: 3.27, 3.75
     private double offsetX = -0.3876;
     private double offsetY = -0.2759;
+    private int tID;
+    private boolean tagDetected = false;
 
     // CONSTRUCTOR
     public AlignReef(RobotContainer robotContainer){
@@ -64,10 +67,16 @@ public class AlignReef extends Command{
     }
     
     @Override
-    public void initialize(){
+    public void initialize() {
         timer.restart();
-        // Gets the tag ID that is being targetted
-        int tID = limelight.getTid();
+        if (tagDetected == false) {
+            // Gets the tag ID that is being targeted
+            tID = limelight.getTid();
+            tagDetected = true;
+
+            // Flash the Limelight LEDs for confirmation
+            LimelightHelpers.setLEDMode_ForceBlink("limelight");
+        }
         // Gets the position of the april tag
         double[] targetPoseArray = Constants.AprilTagMaps.aprilTagMap.get(tID);
         // Checks if the tag exists within the list of all tags
