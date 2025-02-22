@@ -58,6 +58,7 @@ public class AlignReef extends Command{
     private double offsetX = -0.3876;
     private double offsetY = -0.2759;
     private int tID;
+    // Indicates if tag was first detected
     private boolean tagDetected = false;
 
     // CONSTRUCTOR
@@ -78,9 +79,6 @@ public class AlignReef extends Command{
             // Gets the tag ID that is being targeted
             tID = limelight.getTid();
             tagDetected = true;
-
-            // Flash the Limelight LEDs for confirmation
-            LimelightHelpers.setLEDMode_ForceBlink("limelight");
         }
         // Gets the position of the april tag
         double[] targetPoseArray = AprilTagMaps.aprilTagMap.get(tID);
