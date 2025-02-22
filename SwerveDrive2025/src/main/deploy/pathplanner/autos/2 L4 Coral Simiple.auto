@@ -11,9 +11,21 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "Align"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
           }
         },
         {
@@ -48,46 +60,9 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.0
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "Coral Station to Reef 1"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Align"
-          }
-        },
-        {
-          "type": "sequential",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Raise L4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Score L4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Lower"
-                }
-              }
-            ]
           }
         }
       ]

@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.Constants.*;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimelightSubsystem;
@@ -40,7 +41,7 @@ public class AlignReef extends Command{
     // The Desired position to go to
     private Pose2d targetPose;
     // The speed to move to position
-    private final double speed = 0.3;
+    private final double speed = 0.7;
     // The speed (rad/s) to rotate to position
     private final double rotationSpeed = 0.5;
     // The tolerance before stopping align (meters)
@@ -49,27 +50,32 @@ public class AlignReef extends Command{
     private final double yawTolerance = Math.PI / 128;
     // Indicates if alignment uses PID Control
     private final boolean usingPID = false;
+
     // X and Y Offset from the April Tag (Default: Reef)
+    ReefPos reefPos;
     // April Tag position: (3.6576, 4.0259)
     // Previous Position 18: 3.27, 3.75
     private double offsetX = -0.3876;
     private double offsetY = -0.2759;
 
     // CONSTRUCTOR
-    public AlignReef(RobotContainer robotContainer){
+    public AlignReef(RobotContainer robotContainer, ReefPos reefPos){
         this.drivetrain = robotContainer.drivetrain;
         this.limelight = robotContainer.limelight;
+
+        this.reefPos = reefPos;
 
         pidRotate.enableContinuousInput(-Math.PI, Math.PI);
     }
     
     @Override
     public void initialize(){
+        System.out.println("AHAHAHAHAHAHA");
         timer.restart();
         // Gets the tag ID that is being targetted
         int tID = limelight.getTid();
         // Gets the position of the april tag
-        double[] targetPoseArray = Constants.AprilTagMaps.aprilTagMap.get(tID);
+        double[] targetPoseArray = AprilTagMaps.aprilTagMap.get(tID);
         // Checks if the tag exists within the list of all tags
         if (targetPoseArray == null) {
             System.out.println("Error: Target pose array is null for Tag ID: " + tID);
@@ -77,12 +83,18 @@ public class AlignReef extends Command{
             return;
         }
         // Reef Offset Positions
-        if (tID == 17 || tID == 18 || tID == 19){
-            offsetX = -0.3876;
-            offsetY = -0.2759;
+        if (Constants.contains(new double[]{6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22}, tID)){
+            if (reefPos == ReefPos.LEFT){
+                offsetX = -0.3876;
+                offsetY = -0.2759;
+            }
+            else if (reefPos == ReefPos.RIGHT){
+                offsetX = -0.3876;
+                offsetY = 0.3241;
+            }
         }
-        // Creates a Pose2d for the target position]]\[]
-        targetPose = new Pose2d(targetPoseArray[0] * Constants.inToM + offsetX, targetPoseArray[1] * Constants.inToM + offsetY, new Rotation2d((targetPoseArray[3] - 180) * Math.PI / 180));
+        // Creates a Pose2d for the target position
+        targetPose = new Pose2d(targetPoseArray[0] * Constants.inToM + offsetX, targetPoseArray[1] * Constants.inToM + offsetY, new Rotation2d((targetPoseArray[3]-180) * Math.PI / 180));
 
         // Sets the destination to go to for the PID
         pidX.setSetpoint(targetPose.getX());
@@ -97,7 +109,7 @@ public class AlignReef extends Command{
     public void execute(){
         // List of X, Y, Yaw velocities to go to target pose
         System.out.println(limelight.getTid());
-        System.out.println(targetPose.getX() + " | " + targetPose.getY() + " | " + targetPose.getRotation().getRadians());
+        System.out.println("Target Pose: " + targetPose.getX() + " | " + targetPose.getY() + " | " + targetPose.getRotation().getDegrees());
         double[] velocities;
         // PID Alignment
         if (usingPID){
@@ -108,7 +120,9 @@ public class AlignReef extends Command{
             velocities = calculateError();
         }
         // Moves the drivetrain
-        drivetrain.setControl(driveRequest.withVelocityX(-velocities[0]).withVelocityY(-velocities[1]).withRotationalRate(-velocities[2]));
+        drivetrain.setControl(driveRequest.withVelocityX(-velocities[0]).withVelocityY(-velocities[1]).withRotationalRate(velocities[2]));
+        System.out.println("Velocities: " + -velocities[0] + " | " + -velocities[1] + " | " + -velocities[2]);
+
     }
 
     // Calculates the needed velocities to get to the target pose
@@ -120,10 +134,13 @@ public class AlignReef extends Command{
          // Finds the hypotenuse distance to the desired point
          double distance = error.getNorm();
          // This gets the robots current rotation (rad)
-         double yawError = currentPose.getRotation().getRadians();
+         // AngleModulus normalizes the difference to always take the shortest path
+         double yawError = MathUtil.angleModulus(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
+         // Telemetry
          SmartDashboard.putNumber("Distance Error", distance);
          SmartDashboard.putNumber("X Error", error.getX());
          SmartDashboard.putNumber("Y Error", error.getY());
+         System.out.println("Yaw Error: " + (yawError * 180 / Math.PI));
 
          // Intitializes rotation rates
          double velocityX = 0.0;
@@ -142,7 +159,7 @@ public class AlignReef extends Command{
             velocityX = 0;
             velocityY = 0;
         }
-        // Rotational Correction
+        // Rotational Correction 
         if (Math.abs(yawError) > yawTolerance) {
             velocityYaw = calculateYawVelocity(yawError);
         } 

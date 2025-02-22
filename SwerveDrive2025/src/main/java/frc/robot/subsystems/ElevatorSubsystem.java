@@ -47,8 +47,8 @@
             config.Slot0.kI = 0;        
             config.Slot0.kD = 0;   
             // Feedforward
-            config.Slot0.kG = 0.6;        
-            config.Slot0.kS = 0.6;
+            config.Slot0.kG = 0.7;        
+            config.Slot0.kS = 0.7;
             config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
             // Motion Magic
             config.MotionMagic.MotionMagicCruiseVelocity = 100;

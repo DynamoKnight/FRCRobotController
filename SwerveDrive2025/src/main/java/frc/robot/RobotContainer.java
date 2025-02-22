@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.Constants.ReefPos;
 import frc.robot.commands.AlignReef;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -63,8 +64,10 @@ public class RobotContainer {
         NamedCommands.registerCommand("Raise L4", elevator.setCloseLoop(() -> 39).until(() -> Math.abs(39 - elevator.getPosition()) < 0.5));
         NamedCommands.registerCommand("Score L4", dumpRoller.dropCoral(0.2).withTimeout(0.5));
         NamedCommands.registerCommand("Lower", elevator.setCloseLoop(() -> 0.5).until(() -> Math.abs(0.5 - elevator.getPosition()) < 0.5));
-        NamedCommands.registerCommand("Align", new AlignReef(this));
-        // Adds an auto]\[]
+        NamedCommands.registerCommand("Align Left", new AlignReef(this, ReefPos.LEFT).withTimeout(3));
+        NamedCommands.registerCommand("Align Right", new AlignReef(this, ReefPos.RIGHT).withTimeout(3));
+
+        // Adds an auto
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
 
@@ -81,14 +84,14 @@ public class RobotContainer {
     private Command ToggleCoralOuttake(){
         // Level 1 outake
         if (pos == 0){
-            return dumpRoller.dropCoral(0.15).withTimeout(0.5);
+            return dumpRoller.dropCoral(.2).withTimeout(0.5);
         }
         // Levels 2, 3, 4 outtake
         else{
             // Drops to Level 1 after done
-            return dumpRoller.dropCoral(0.2).withTimeout(2).andThen(setPosition(0));
+            return dumpRoller.dropCoral(.3).withTimeout(.5);
         }
-        
+         
     }
 
     // Moves the elevator to the position based on the list
@@ -150,11 +153,12 @@ public class RobotContainer {
         // Level 4
         joystick2.y().onTrue(setPosition(3));
         // Outtakes coral
-        joystick2.rightTrigger().onTrue(ToggleCoralOuttake().withTimeout(0.5));
+        joystick2.rightTrigger().whileTrue(ToggleCoralOuttake());
 
-        // Aligns to the april tag
-        // Command ends once right bumper released
-        joystick.rightBumper().whileTrue(new AlignReef(this));
+        // Aligns to the reef april tag, right side
+        joystick.rightTrigger().whileTrue(new AlignReef(this, Constants.ReefPos.RIGHT));
+        // Aligns to the reef april tag, left side
+        joystick.leftTrigger().whileTrue(new AlignReef(this, Constants.ReefPos.LEFT));
     }
 
     public Command getAutonomousCommand() {

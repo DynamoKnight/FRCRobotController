@@ -13,6 +13,21 @@ public final class Constants {
         CENTER
     }
 
+    public enum ReefPos {
+        LEFT,
+        RIGHT
+    }
+
+    // Returns true if the value is inside the list
+    public static boolean contains(double[] array, double value) {
+        for (double element : array) {
+            if (element == value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Holds all the positions of the April Tags
     public class AprilTagMaps {
         // Field Map Source: https://firstfrc.blob.core.windows.net/frc2025/FieldAssets/2025FieldDrawings-FieldLayoutAndMarking.pdf
@@ -39,6 +54,7 @@ public final class Constants {
             aprilTagMap.put(15, new double[]{325.68, 75.39, 73.54, 180.0, 30.0});
             aprilTagMap.put(16, new double[]{235.73, -0.15, 51.25, 90.0, 0.0});
             aprilTagMap.put(17, new double[]{160.39, 130.17, 12.13, 240.0, 0.0});
+            //(X, Y) in meters: (3.6576, 4.0259)
             aprilTagMap.put(18, new double[]{144.00, 158.50, 12.13, 180.0, 0.0});
             aprilTagMap.put(19, new double[]{160.39, 186.83, 12.13, 120.0, 0.0});
             aprilTagMap.put(20, new double[]{193.10, 186.83, 12.13, 60.0, 0.0});
