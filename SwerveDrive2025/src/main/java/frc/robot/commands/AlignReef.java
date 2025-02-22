@@ -57,6 +57,8 @@ public class AlignReef extends Command{
     // Previous Position 18: 3.27, 3.75
     private double offsetX = -0.3876;
     private double offsetY = -0.2759;
+    private int tID;
+    private boolean tagDetected = false;
 
     // CONSTRUCTOR
     public AlignReef(RobotContainer robotContainer, ReefPos reefPos){
@@ -72,8 +74,14 @@ public class AlignReef extends Command{
     public void initialize(){
         System.out.println("AHAHAHAHAHAHA");
         timer.restart();
-        // Gets the tag ID that is being targetted
-        int tID = limelight.getTid();
+        if (tagDetected == false) {
+            // Gets the tag ID that is being targeted
+            tID = limelight.getTid();
+            tagDetected = true;
+
+            // Flash the Limelight LEDs for confirmation
+            LimelightHelpers.setLEDMode_ForceBlink("limelight");
+        }
         // Gets the position of the april tag
         double[] targetPoseArray = AprilTagMaps.aprilTagMap.get(tID);
         // Checks if the tag exists within the list of all tags
