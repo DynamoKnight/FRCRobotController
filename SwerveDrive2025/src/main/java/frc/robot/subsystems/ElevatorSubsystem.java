@@ -43,8 +43,11 @@
         private void configureMotor(TalonFX motor) {
             TalonFXConfiguration config = new TalonFXConfiguration();
             // PID
-            config.Slot0.kP = 1;        
-            config.Slot0.kI = 0;        
+            // Reaction to error, too high will cause oscillation, too low will cause slow response
+            config.Slot0.kP = 1;
+            // Reaction to steady-state error, not needed to change
+            config.Slot0.kI = 0;       
+            // Reaction to change in error, lessens overshooting
             config.Slot0.kD = 0;   
             // Feedforward
             config.Slot0.kG = 0.7;        

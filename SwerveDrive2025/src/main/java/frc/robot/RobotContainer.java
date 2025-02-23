@@ -28,7 +28,7 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 
 public class RobotContainer {
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 2; // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
@@ -53,7 +53,7 @@ public class RobotContainer {
     public final LimelightSubsystem limelight = new LimelightSubsystem(this);
 
      // Represents a list of the number of rotations to get to each level
-     Double[] positions = {0.5, 10.5, 21.0, 39.0};
+     Double[] positions = {0.25, 11.0, 21.5, 39.0};
      int pos = 0;
 
     /* Path follower */
@@ -89,7 +89,7 @@ public class RobotContainer {
         // Levels 2, 3, 4 outtake
         else{
             // Drops to Level 1 after done
-            return dumpRoller.dropCoral(.3).withTimeout(.5);
+            return dumpRoller.dropCoral(.2).withTimeout(0.5);
         }
          
     }
