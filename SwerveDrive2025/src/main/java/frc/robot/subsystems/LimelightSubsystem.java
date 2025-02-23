@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import com.ctre.phoenix6.Utils;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -69,20 +70,24 @@ public class LimelightSubsystem extends SubsystemBase {
     public void periodic() {
         // If Limelight is in use
         if (kUseLimelight) {
+            // Focuses on specific tags, filters out irrelevent tags
+            int[] validIDs = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
+            LimelightHelpers.SetFiducialIDFiltersOverride("limelight", validIDs);
+
             // Returns the robot's current state(position, orientation, and velocity)
             var driveState = m_robotContainer.drivetrain.getState();
             // Gets the heading/rotation of the robot in degrees
             double headingDeg = driveState.Pose.getRotation().getDegrees();
-            // Converts the robot's angular velocity from radians to rotations per second
+            // Gets the robot's angular velocity, converts from radians to rotations per second
             double omegaRps = Units.radiansToRotations(driveState.Speeds.omegaRadiansPerSecond);
-            
+            // Initializes the Robot's Orientation
             LimelightHelpers.SetRobotOrientation("limelight", headingDeg, 0, 0, 0, 0, 0);
+            // Retrieves the robots pose estimation on the field from the Blue Origin using Megatag 2
             var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
             if (llMeasurement != null && llMeasurement.tagCount > 0 && omegaRps < 2.0) {
                 // Adds the limelight pose estimate to the drivetrain's odometry calculation
                 m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, Utils.fpgaToCurrentTime(llMeasurement.timestampSeconds));
             }
-
             // Posts data to SmartDashboard
             // The parameter inside getDouble or getDoubleArray is what is returned if nothing is found
             SmartDashboard.putNumber("limelight tx", tx.getDouble(0));
@@ -122,8 +127,11 @@ public class LimelightSubsystem extends SubsystemBase {
         return getBotPoseFieldBlue()[7];
     }
 
+    // Returns a Pose2D of the robot's X, Y and Yaw relative to the field
     public Pose2d getPose() {
+        // Creates Rotation 2D of the robot's yaw, converts to radians
         Rotation2d rot = new Rotation2d(getBotPoseFieldBlue()[5] * Math.PI / 180);
+        // Creates a Pose2D of the robot's x, y, and yaw
         Pose2d out = new Pose2d(getBotPoseFieldBlue()[0], getBotPoseFieldBlue()[1], rot);
         return out;
     }
