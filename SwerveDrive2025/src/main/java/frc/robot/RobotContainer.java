@@ -64,8 +64,8 @@ public class RobotContainer {
         NamedCommands.registerCommand("Raise L4", elevator.setCloseLoop(() -> 39).until(() -> Math.abs(39 - elevator.getPosition()) < 0.5));
         NamedCommands.registerCommand("Score L4", dumpRoller.dropCoral(0.2).withTimeout(0.5));
         NamedCommands.registerCommand("Lower", elevator.setCloseLoop(() -> 0.5).until(() -> Math.abs(0.5 - elevator.getPosition()) < 0.5));
-        NamedCommands.registerCommand("Align Left", new AlignReef(this, ReefPos.LEFT).withTimeout(3));
-        NamedCommands.registerCommand("Align Right", new AlignReef(this, ReefPos.RIGHT).withTimeout(3));
+        NamedCommands.registerCommand("Align Left", new AlignReef(this, Constants.ReefPos.LEFT).withTimeout(3));
+        NamedCommands.registerCommand("Align Right", new AlignReef(this, Constants.ReefPos.RIGHT).withTimeout(3));
 
         // Adds an auto
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
@@ -84,12 +84,12 @@ public class RobotContainer {
     private Command ToggleCoralOuttake(){
         // Level 1 outake
         if (pos == 0){
-            return dumpRoller.dropCoral(.2).withTimeout(0.5);
+            return dumpRoller.dropCoral(.2);
         }
         // Levels 2, 3, 4 outtake
         else{
             // Drops to Level 1 after done
-            return dumpRoller.dropCoral(.2).withTimeout(0.5);
+            return dumpRoller.dropCoral(.2);
         }
          
     }

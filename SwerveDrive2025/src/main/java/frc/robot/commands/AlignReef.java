@@ -45,7 +45,7 @@ public class AlignReef extends Command{
     // The speed (rad/s) to rotate to position
     private final double rotationSpeed = 0.5;
     // The tolerance before stopping align (meters)
-    private final double positionTolerance = 0.025;
+    private final double positionTolerance = 0.01;
     // The tolerance for yaw alignment (radians)
     private final double yawTolerance = Math.PI / 64;
     // Indicates if alignment uses PID Control

@@ -101,6 +101,61 @@
               }
             ]
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Score 2 to Pickup"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Coral Station to Reef 2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Align Right"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Raise L4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Score L4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Lower"
+                }
+              }
+            ]
+          }
         }
       ]
     }
