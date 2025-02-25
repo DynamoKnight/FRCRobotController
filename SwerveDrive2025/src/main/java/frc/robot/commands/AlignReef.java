@@ -51,12 +51,14 @@ public class AlignReef extends Command{
     // Indicates if alignment uses PID Control
     private final boolean usingPID = false;
 
-    // X and Y Offset from the April Tag (Default: Reef)
+    // Indicates the Left or Right side of reef
     ReefPos reefPos;
+    // X and Y Offset from the April Tag (Default: Reef)
     private double offsetX = -0.3876;
     private double offsetY = -0.2759;
+    // Targetted Tag ID
     private int tID;
-    // Indicates if tag was first detected
+    // Indicates if tag was detected
     private boolean tagDetected;
 
     // CONSTRUCTOR
@@ -68,6 +70,7 @@ public class AlignReef extends Command{
 
         pidRotate.enableContinuousInput(-Math.PI, Math.PI);
     }     
+    
     
     @Override
     public void initialize(){
@@ -109,18 +112,18 @@ public class AlignReef extends Command{
         pidY.setSetpoint(targetPose.getY());
         // Converts to radians
         pidRotate.setSetpoint(targetPose.getRotation().getRadians());
-
-        SmartDashboard.putNumber("Tag ID", tID);
+        // Displays tID in AdvantageScope
+        Logger.recordOutput("Reefscape/Limelight/Targetted tID", tID);
+        // Displays Target Pose in AdvantageScope
+        Logger.recordOutput("Reefscape/Limelight/Target Pose tID", targetPose.getX() + ", " + targetPose.getY() + ", " + targetPose.getRotation().getDegrees());
+        
     }
 
     @Override
     public void execute(){
         if (!tagDetected){
             return;
-        }
-        System.out.println(limelight.getTid());
-        System.out.println("Target Pose: " + targetPose.getX() + " | " + targetPose.getY() + " | " + targetPose.getRotation().getDegrees());
-        
+        }        
         // List of X, Y, Yaw velocities to go to target pose
         double[] velocities;
         // PID Alignment
@@ -133,7 +136,8 @@ public class AlignReef extends Command{
         }
         // Moves the drivetrain
         drivetrain.setControl(driveRequest.withVelocityX(velocities[0]).withVelocityY(velocities[1]).withRotationalRate(velocities[2]));
-        System.out.println("Velocities: " + -velocities[0] + " | " + -velocities[1] + " | " + -velocities[2]);
+        // Displays Robot Target Vector in AdvantageScope
+        Logger.recordOutput("Reefscape/Limelight/Target Pose tID", -velocities[0] + ", " + -velocities[1] + ", " + -velocities[2]);
 
     }
 
@@ -148,11 +152,9 @@ public class AlignReef extends Command{
          // This gets the robots current rotation (rad)
          // AngleModulus normalizes the difference to always take the shortest path
          double yawError = MathUtil.angleModulus(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
-         // Telemetry
-         SmartDashboard.putNumber("Distance Error", distance);
-         SmartDashboard.putNumber("X Error", error.getX());
-         SmartDashboard.putNumber("Y Error", error.getY());
-         System.out.println("Yaw Error: " + (yawError * 180 / Math.PI));
+         
+         // Displays Error in AdvantageScope
+         Logger.recordOutput("Reefscape/Limelight/Error", "Distance: "+ -distance + ", Pose:" + error.getX() + ", " + error.getY() + ", " + (yawError * 180 / Math.PI));
 
          // Intitializes rotation rates
          double velocityX = 0.0;
