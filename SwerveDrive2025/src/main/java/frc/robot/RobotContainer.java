@@ -63,10 +63,7 @@ public class RobotContainer {
     public RobotContainer() {
         // Creates a Named Command, that can be accessed in path planner5
         NamedCommands.registerCommand("Raise L4", elevator.setCloseLoop(() -> 39).until(() -> Math.abs(39 - elevator.getPosition()) < 0.5));
-        NamedCommands.registerCommand("Score L4", Commands.sequence(
-            dumpRoller.dropCoral(0.2).withTimeout(0.5))
-        
-        );
+        NamedCommands.registerCommand("Score L4", CoralOuttake());
         NamedCommands.registerCommand("Lower", elevator.setCloseLoop(() -> 0.25).until(() -> Math.abs(0.25 - elevator.getPosition()) < 0.5));
         NamedCommands.registerCommand("Align Left", new AlignReef(this, ReefPos.LEFT).withTimeout(3));
         NamedCommands.registerCommand("Align Right", new AlignReef(this, ReefPos.RIGHT).withTimeout(3));
@@ -85,7 +82,7 @@ public class RobotContainer {
     }
 
     // Sets different powers for different levels
-    private Command ToggleCoralOuttake(){
+    private Command CoralOuttake(){
         // Level 1 outake
         if (pos == 0){
             return dumpRoller.dropCoral(.2);
@@ -93,7 +90,12 @@ public class RobotContainer {
         // Levels 2, 3, 4 outtake
         else{
             // Drops to Level 1 after done
-            return dumpRoller.dropCoral(.2);
+            pos = 0;
+            // Sequence of Commands
+            return Commands.sequence(
+                dumpRoller.dropCoral(.2).withTimeout(2),
+                elevator.setCloseLoop(() -> 0)
+            );
         }
          
     }
@@ -139,10 +141,15 @@ public class RobotContainer {
         joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-        // reset the field-centric heading on left bumper press
+        // Reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        // Aligns to the reef april tag, right side
+        joystick.rightTrigger().whileTrue(new AlignReef(this, Constants.ReefPos.RIGHT));
+        // Aligns to the reef april tag, left side
+        joystick.leftTrigger().whileTrue(new AlignReef(this, Constants.ReefPos.LEFT));
 
         /////////////////////////////
         // OPERATOR CONTROL
@@ -157,15 +164,7 @@ public class RobotContainer {
         // Level 4
         joystick2.y().onTrue(setPosition(3));
         // Outtakes coral
-        joystick2.rightTrigger().whileTrue(Commands.sequence(
-            ToggleCoralOuttake().withTimeout(2.5), 
-            elevator.setCloseLoop(() -> 0))
-            );
-
-        // Aligns to the reef april tag, right side
-        joystick.rightTrigger().whileTrue(new AlignReef(this, Constants.ReefPos.RIGHT));
-        // Aligns to the reef april tag, left side
-        joystick.leftTrigger().whileTrue(new AlignReef(this, Constants.ReefPos.LEFT));
+        joystick2.rightTrigger().whileTrue(CoralOuttake());
     }
 
     public Command getAutonomousCommand() {
