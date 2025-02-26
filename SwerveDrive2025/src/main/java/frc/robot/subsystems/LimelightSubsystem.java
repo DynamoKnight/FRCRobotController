@@ -70,10 +70,6 @@ public class LimelightSubsystem extends SubsystemBase {
     public void periodic() {
         // If Limelight is in use
         if (kUseLimelight) {
-            // Focuses on specific tags, filters out irrelevent tags
-            int[] validIDs = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
-            LimelightHelpers.SetFiducialIDFiltersOverride("limelight", validIDs);
-
             // Returns the robot's current state(position, orientation, and velocity)
             var driveState = m_robotContainer.drivetrain.getState();
             // Gets the heading/rotation of the robot in degrees

@@ -10,6 +10,7 @@ import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 
+import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,6 +31,11 @@ public class Robot extends LoggedRobot {
     Logger.addDataReceiver(new NT4Publisher());
     // Starts AdvantageScope
     Logger.start();
+
+    // Forwards ports to limelight.local
+    for (int port = 5800; port <= 5809; port++){
+      PortForwarder.add(port, "limelight.local", port);
+    }
   }
 
   @Override
