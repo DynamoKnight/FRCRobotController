@@ -62,9 +62,9 @@ public class RobotContainer {
 
     public RobotContainer() {
         // Creates a Named Command, that can be accessed in path planner5
-        NamedCommands.registerCommand("Raise L4", elevator.setCloseLoop(() -> 39).until(() -> Math.abs(39 - elevator.getPosition()) < 0.5));
+        NamedCommands.registerCommand("Raise L4", setPosition(3).until(() -> Math.abs(39 - elevator.getPosition()) < 0.5));
         NamedCommands.registerCommand("Score L4", dumpRoller.dropCoral(0.2).withTimeout(0.5));
-        NamedCommands.registerCommand("Lower", elevator.setCloseLoop(() -> 0.5).until(() -> Math.abs(0.5 - elevator.getPosition()) < 0.5));
+        NamedCommands.registerCommand("Lower", setPosition(0).until(() -> Math.abs(0.5 - elevator.getPosition()) < 0.5));
         NamedCommands.registerCommand("Align Left", new AlignReef(this, Constants.ReefPos.LEFT).withTimeout(3));
         NamedCommands.registerCommand("Align Right", new AlignReef(this, Constants.ReefPos.RIGHT).withTimeout(3));
 
@@ -156,8 +156,8 @@ public class RobotContainer {
         // Outtakes coral
         joystick2.rightTrigger().whileTrue(Commands.sequence(
             ToggleCoralOuttake().withTimeout(2.5), 
-            elevator.setCloseLoop(() -> 0))
-            );
+            setPosition(0)
+        ));
 
         // Aligns to the reef april tag, right side
         joystick.rightTrigger().whileTrue(new AlignReef(this, Constants.ReefPos.RIGHT));
