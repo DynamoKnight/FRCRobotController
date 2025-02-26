@@ -10,7 +10,7 @@
     import com.revrobotics.spark.SparkMax;
 
     public class DumpRollerSubsystem extends SubsystemBase{
-        CommandXboxController controller;
+        
         // Initializes the motor
         SparkMax coralMotor = new SparkMax(2, MotorType.kBrushless);
         Timer a_timer = new Timer();
@@ -20,8 +20,8 @@
         double power = 0.2;
 
         // Initializes the motors and controller
-        public DumpRollerSubsystem(CommandXboxController controller) {
-            this.controller = controller;
+        public DumpRollerSubsystem() {
+            
         }
 
         // Outtakes the coral
@@ -36,12 +36,6 @@
 
         @Override
         public void periodic() {
-            // Outakes on Right trigger 
-            /*if (controller.rightTrigger().getAsBoolean()){
-                coralMotor.set(power);
-            }
-            else{
-                coralMotor.set(0);
-            }*/
+            
         }
     }

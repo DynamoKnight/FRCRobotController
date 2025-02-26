@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.ReefPos;
@@ -48,8 +49,8 @@ public class RobotContainer {
 
     // Subsystems
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    public final ElevatorSubsystem elevator = new ElevatorSubsystem(joystick2);
-    public final DumpRollerSubsystem dumpRoller = new DumpRollerSubsystem(joystick2);
+    public final ElevatorSubsystem elevator = new ElevatorSubsystem();
+    public final DumpRollerSubsystem dumpRoller = new DumpRollerSubsystem();
     public final LimelightSubsystem limelight = new LimelightSubsystem(this);
 
      // Represents a list of the number of rotations to get to each level
@@ -153,7 +154,10 @@ public class RobotContainer {
         // Level 4
         joystick2.y().onTrue(setPosition(3));
         // Outtakes coral
-        joystick2.rightTrigger().whileTrue(ToggleCoralOuttake());
+        joystick2.rightTrigger().whileTrue(Commands.sequence(
+            ToggleCoralOuttake().withTimeout(2.5), 
+            elevator.setCloseLoop(() -> 0))
+            );
 
         // Aligns to the reef april tag, right side
         joystick.rightTrigger().whileTrue(new AlignReef(this, Constants.ReefPos.RIGHT));
