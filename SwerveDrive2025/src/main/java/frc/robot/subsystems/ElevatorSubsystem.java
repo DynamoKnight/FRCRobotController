@@ -28,7 +28,7 @@
         private final VoltageOut voltageOut = new VoltageOut(0);
 
         // Initializes the motors and controller
-        public ElevatorSubsystem(CommandXboxController controller) {
+        public ElevatorSubsystem() {
             // Back Elevator follows front elevator
             backElevator.setControl(new Follower(frontElevator.getDeviceID(), false));
             // Make sure elevator is at base postion each time rio restarts.
