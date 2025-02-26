@@ -72,12 +72,6 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.25
-          }
-        },
-        {
           "type": "sequential",
           "data": {
             "commands": [
@@ -124,12 +118,6 @@
           "type": "named",
           "data": {
             "name": "Align Right"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.25
           }
         },
         {

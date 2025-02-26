@@ -1,17 +1,21 @@
 package frc.robot.commands;
 
+import java.io.IOException;
+import java.util.Optional;
+
 import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Constants.*;
@@ -41,7 +45,7 @@ public class AlignReef extends Command{
     // The Desired position to go to
     private Pose2d targetPose;
     // The speed to move to position
-    private final double speed = 0.7;
+    private final double speed = 1.0;
     // The speed (rad/s) to rotate to position
     private final double rotationSpeed = 0.5;
     // The tolerance before stopping align (meters)
@@ -60,6 +64,8 @@ public class AlignReef extends Command{
     private int tID;
     // Indicates if tag was detected
     private boolean tagDetected;
+    // April Tags
+    AprilTagFieldLayout aprilTagMap;
 
     // CONSTRUCTOR
     public AlignReef(RobotContainer robotContainer, ReefPos reefPos){
@@ -67,10 +73,9 @@ public class AlignReef extends Command{
         this.limelight = robotContainer.limelight;
 
         this.reefPos = reefPos;
-
+        // -180 and 180 degrees are the same point, so its continuous
         pidRotate.enableContinuousInput(-Math.PI, Math.PI);
     }     
-    
     
     @Override
     public void initialize(){
@@ -78,11 +83,28 @@ public class AlignReef extends Command{
         timer.restart();
         // Gets the tag ID that is being targeted
         tID = limelight.getTid();
-        // Gets the position of the april tag
-        double[] targetPoseArray = AprilTagMaps.aprilTagMap.get(tID);
-        // Checks if the tag exists within the list of all tags
-        if (targetPoseArray == null) {
-            System.out.println("Error: Target pose array is null for Tag ID: " + tID);
+        // Sets the April Tag Field Layout for Reefscape
+        try {
+            aprilTagMap = new AprilTagFieldLayout("SwerveDrive2025/2025-reefscape-welded.json");
+        } 
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            System.out.println("Path not found for AprilTagFieldLayout!");
+            tagDetected = false;
+            return;
+        }
+        // Attempts to get the Pose3d of the april tag
+        Optional<Pose3d> aprilTagOptional = aprilTagMap.getTagPose(18);
+        Pose3d aprilTagPose;
+        // If an object exists, then get the Pose3d
+        if (aprilTagOptional.isPresent()){
+            // Gets the position of the april tag as a Pose3d
+            aprilTagPose = aprilTagOptional.get();
+        }
+        // Object didn't exist
+        else{
+            System.out.println("Error: Pose is null for Tag ID: " + tID);
             // Command is useless, thus it will end
             tagDetected = false;
             return;
@@ -100,12 +122,13 @@ public class AlignReef extends Command{
             }
         }
         // Creates a Rotation2D of the target rotation of the robot (radians)
-        Rotation2d yaw = new Rotation2d((targetPoseArray[3] - 180) * Math.PI / 180);
+        // The target rotation of the robot is opposite of the april tag's rotation
+        Rotation2d yaw = new Rotation2d(aprilTagPose.getRotation().getAngle() - Math.PI);
         // Calculates offset based on robots rotation
         offsetX = (offsetX * Math.cos(yaw.getRadians())) - (offsetY * Math.sin(yaw.getRadians()));
         offsetY = (offsetX * Math.sin(yaw.getRadians())) + ((offsetY * Math.cos(yaw.getRadians())));
         // Creates a Pose2d for the target position
-        targetPose = new Pose2d(targetPoseArray[0] * Constants.inToM + offsetX, targetPoseArray[1] * Constants.inToM + offsetY, yaw);
+        targetPose = new Pose2d(aprilTagPose.getX() + offsetX, aprilTagPose.getY() + offsetY, yaw);
 
         // Sets the destination to go to for the PID
         pidX.setSetpoint(targetPose.getX());
@@ -119,8 +142,10 @@ public class AlignReef extends Command{
         
     }
 
+    // Called every 20ms to perform actions of Command
     @Override
     public void execute(){
+        // If no tag was detected, then Command wont execute
         if (!tagDetected){
             return;
         }        
@@ -137,7 +162,7 @@ public class AlignReef extends Command{
         // Moves the drivetrain
         drivetrain.setControl(driveRequest.withVelocityX(velocities[0]).withVelocityY(velocities[1]).withRotationalRate(velocities[2]));
         // Displays Robot Target Vector in AdvantageScope
-        Logger.recordOutput("Reefscape/Limelight/Target Pose tID", -velocities[0] + ", " + -velocities[1] + ", " + -velocities[2]);
+        Logger.recordOutput("Reefscape/Limelight/Target Pose tID", velocities[0] + ", " + velocities[1] + ", " + velocities[2]);
 
     }
 
@@ -213,16 +238,18 @@ public class AlignReef extends Command{
         return Math.signum(yawError) * rotationSpeed;
     }
 
+    // Called every 20ms to check if command is ended
     @Override
     public boolean isFinished(){
+        // If a tag wasn't detected, command will end
         if (!tagDetected){
             return true;
         }
-        // Without PID, it needs to check until the tolerance is reached
+        // Without PID, it will check until the tolerance is reached
         if (!usingPID){
             Pose2d currentPose = drivetrain.getState().Pose;
             double distance = targetPose.getTranslation().getDistance(currentPose.getTranslation());
-            // This gets the hoz offset from the target
+            // This gets the yaw error from the target
             double yawError = MathUtil.angleModulus(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
 
             // Ends once robot is within tolerance
@@ -234,9 +261,10 @@ public class AlignReef extends Command{
         }
     }
 
+    // Called once Command ends
     @Override
     public void end(boolean interrupted){
-        // Ensures stop
+        // Ensures drivetrain stops
         drivetrain.setControl(stop);
 
         if (interrupted) {
