@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.ReefPos;
@@ -62,10 +63,13 @@ public class RobotContainer {
     public RobotContainer() {
         // Creates a Named Command, that can be accessed in path planner5
         NamedCommands.registerCommand("Raise L4", elevator.setCloseLoop(() -> 39).until(() -> Math.abs(39 - elevator.getPosition()) < 0.5));
-        NamedCommands.registerCommand("Score L4", dumpRoller.dropCoral(0.2).withTimeout(0.5));
-        NamedCommands.registerCommand("Lower", elevator.setCloseLoop(() -> 0.5).until(() -> Math.abs(0.5 - elevator.getPosition()) < 0.5));
-        NamedCommands.registerCommand("Align Left", new AlignReef(this, Constants.ReefPos.LEFT).withTimeout(3));
-        NamedCommands.registerCommand("Align Right", new AlignReef(this, Constants.ReefPos.RIGHT).withTimeout(3));
+        NamedCommands.registerCommand("Score L4", Commands.sequence(
+            dumpRoller.dropCoral(0.2).withTimeout(0.5))
+        
+        );
+        NamedCommands.registerCommand("Lower", elevator.setCloseLoop(() -> 0.25).until(() -> Math.abs(0.25 - elevator.getPosition()) < 0.5));
+        NamedCommands.registerCommand("Align Left", new AlignReef(this, ReefPos.LEFT).withTimeout(3));
+        NamedCommands.registerCommand("Align Right", new AlignReef(this, ReefPos.RIGHT).withTimeout(3));
 
         // Adds an auto
         autoChooser = AutoBuilder.buildAutoChooser("Tests");

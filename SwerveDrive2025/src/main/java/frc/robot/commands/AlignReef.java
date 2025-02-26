@@ -41,7 +41,7 @@ public class AlignReef extends Command{
     // The Desired position to go to
     private Pose2d targetPose;
     // The speed to move to position
-    private final double speed = 0.7;
+    private final double speed = 1.0;
     // The speed (rad/s) to rotate to position
     private final double rotationSpeed = 0.5;
     // The tolerance before stopping align (meters)
