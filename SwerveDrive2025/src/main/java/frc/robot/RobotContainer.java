@@ -62,9 +62,9 @@ public class RobotContainer {
 
     public RobotContainer() {
         // Creates a Named Command, that can be accessed in path planner5
-        NamedCommands.registerCommand("Raise L4", elevator.setCloseLoop(() -> 39).until(() -> Math.abs(39 - elevator.getPosition()) < 0.5));
+        NamedCommands.registerCommand("Raise L4", setPosition(3).until(() -> Math.abs(39 - elevator.getPosition()) < 0.5));
         NamedCommands.registerCommand("Score L4", CoralOuttake());
-        NamedCommands.registerCommand("Lower", elevator.setCloseLoop(() -> 0.25).until(() -> Math.abs(0.25 - elevator.getPosition()) < 0.5));
+        NamedCommands.registerCommand("Lower", setPosition(0).until(() -> Math.abs(0.25 - elevator.getPosition()) < 0.5));
         NamedCommands.registerCommand("Align Left", new AlignReef(this, ReefPos.LEFT).withTimeout(3));
         NamedCommands.registerCommand("Align Right", new AlignReef(this, ReefPos.RIGHT).withTimeout(3));
 
@@ -89,12 +89,11 @@ public class RobotContainer {
         }
         // Levels 2, 3, 4 outtake
         else{
-            // Drops to Level 1 after done
-            pos = 0;
             // Sequence of Commands
             return Commands.sequence(
                 dumpRoller.dropCoral(.2).withTimeout(2),
-                elevator.setCloseLoop(() -> 0)
+                // Drops to Level 1 after done
+                setPosition(0)
             );
         }
          
