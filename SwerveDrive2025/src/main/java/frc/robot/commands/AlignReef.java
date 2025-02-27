@@ -83,6 +83,16 @@ public class AlignReef extends Command{
         timer.restart();
         // Gets the tag ID that is being targeted
         tID = limelight.getTid();
+        double[] aprilTagList = Constants.AprilTagMaps.aprilTagMap.get(tID);
+        // Checks if the tag exists within the list of all tags
+        if (aprilTagList == null) {
+            System.out.println("Error: Target pose array is null for Tag ID: " + tID);
+            // Command is useless, thus it will end
+            tagDetected = false;
+            return;
+        }
+        Pose2d aprilTagPose = new Pose2d(aprilTagList[0] * Constants.inToM, aprilTagList[1] * Constants.inToM, new Rotation2d(aprilTagList[3]));
+        /*
         // Sets the April Tag Field Layout for Reefscape
         try {
             aprilTagMap = new AprilTagFieldLayout("SwerveDrive2025/2025-reefscape-welded.json");
@@ -95,7 +105,8 @@ public class AlignReef extends Command{
             return;
         }
         // Attempts to get the Pose3d of the april tag
-        Optional<Pose3d> aprilTagOptional = aprilTagMap.getTagPose(18);
+        Optional<Pose3d> aprilTagOptional = aprilTagMap.getTagPose(tID);
+        
         Pose3d aprilTagPose;
         // If an object exists, then get the Pose3d
         if (aprilTagOptional.isPresent()){
@@ -109,6 +120,7 @@ public class AlignReef extends Command{
             tagDetected = false;
             return;
         }
+        */
         tagDetected = true;
         // Reef Offset Positions
         if (Constants.contains(new double[]{6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22}, tID)){
@@ -123,7 +135,7 @@ public class AlignReef extends Command{
         }
         // Creates a Rotation2D of the target rotation of the robot (radians)
         // The target rotation of the robot is opposite of the april tag's rotation
-        Rotation2d yaw = new Rotation2d(aprilTagPose.getRotation().getAngle() - Math.PI);
+        Rotation2d yaw = new Rotation2d(aprilTagPose.getRotation().getRadians() - Math.PI);
         // Calculates offset based on robots rotation
         offsetX = (offsetX * Math.cos(yaw.getRadians())) - (offsetY * Math.sin(yaw.getRadians()));
         offsetY = (offsetX * Math.sin(yaw.getRadians())) + ((offsetY * Math.cos(yaw.getRadians())));

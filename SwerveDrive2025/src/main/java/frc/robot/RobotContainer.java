@@ -85,13 +85,14 @@ public class RobotContainer {
     private Command CoralOuttake(){
         // Level 1 outake
         if (pos == 0){
-            return dumpRoller.dropCoral(.2);
+            return dumpRoller.dropCoral(.2).withTimeout(.5);
         }
         // Levels 2, 3, 4 outtake
         else{
             // Sequence of Commands
             return Commands.sequence(
-                dumpRoller.dropCoral(.2).withTimeout(2),
+                dumpRoller.dropCoral(.2).withTimeout(.5),
+                dumpRoller.keepCoral().withTimeout(.1),
                 // Drops to Level 1 after done
                 setPosition(0)
             );
@@ -163,7 +164,7 @@ public class RobotContainer {
         // Level 4
         joystick2.y().onTrue(setPosition(3));
         // Outtakes coral
-        joystick2.rightTrigger().whileTrue(CoralOuttake());
+        joystick2.rightTrigger().onTrue(CoralOuttake());
     }
 
     public Command getAutonomousCommand() {
