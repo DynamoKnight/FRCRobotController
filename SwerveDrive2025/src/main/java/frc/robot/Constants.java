@@ -53,8 +53,9 @@ public final class Constants {
             aprilTagMap.put(14, new double[]{325.68, 241.64, 73.54, 180.0, 30.0});
             aprilTagMap.put(15, new double[]{325.68, 75.39, 73.54, 180.0, 30.0});
             aprilTagMap.put(16, new double[]{235.73, -0.15, 51.25, 90.0, 0.0});
+            // Tag 17: (4.073906m, 3.306318m, 0.308102m, 4PI/3 rad, 0 rad)
             aprilTagMap.put(17, new double[]{160.39, 130.17, 12.13, 240.0, 0.0});
-            //(X, Y) in meters: (3.6576, 4.0259)
+            // Tag 18: (3.6576m, 4.0259m, 0.308102m, PI rad, 0 rad)
             aprilTagMap.put(18, new double[]{144.00, 158.50, 12.13, 180.0, 0.0});
             aprilTagMap.put(19, new double[]{160.39, 186.83, 12.13, 120.0, 0.0});
             aprilTagMap.put(20, new double[]{193.10, 186.83, 12.13, 60.0, 0.0});

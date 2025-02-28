@@ -86,6 +86,7 @@ public class LimelightSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("limelight tx", tx.getDouble(0));
             SmartDashboard.putNumber("limelight yaw", getYaw());
             SmartDashboard.putNumber("limelight ta", ta.getDouble(0));
+            SmartDashboard.putBoolean("Tag Detected", isTagDetected());
         }
     }
     
@@ -114,6 +115,15 @@ public class LimelightSubsystem extends SubsystemBase {
 
     public int getTid() {
         return (int) tid.getDouble(0);
+    }
+
+    public boolean isTagDetected() {
+        if (getTid() == 0){
+            return false;
+        }
+        else{
+            return true;
+        }
     }
 
     public double getTagCount() {

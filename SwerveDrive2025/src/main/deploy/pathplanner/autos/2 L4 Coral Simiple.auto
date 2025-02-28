@@ -96,24 +96,6 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Start Wheel"
-                }
-              },
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 0.25
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Stop Wheel"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
                   "name": "Lower"
                 }
               }
