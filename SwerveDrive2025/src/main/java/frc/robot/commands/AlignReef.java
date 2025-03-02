@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import java.io.IOException;
 import java.util.Optional;
 
@@ -19,8 +21,10 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.Constants.*;
 import frc.robot.RobotContainer;
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimelightSubsystem;
 
@@ -29,6 +33,7 @@ public class AlignReef extends Command{
     // Subsystems from RobotContainer
     private LimelightSubsystem limelight;
     private CommandSwerveDrivetrain drivetrain;
+    private RobotContainer robotContainer;
 
     Timer timer = new Timer();
 
@@ -70,6 +75,7 @@ public class AlignReef extends Command{
 
     // CONSTRUCTOR
     public AlignReef(RobotContainer robotContainer, ReefPos reefPos){
+        this.robotContainer = robotContainer;
         this.drivetrain = robotContainer.drivetrain;
         this.limelight = robotContainer.limelight;
 
@@ -154,7 +160,7 @@ public class AlignReef extends Command{
         pidRotate.setSetpoint(targetPose.getRotation().getRadians());
         // Prints Target Pose
         System.out.println("Target Pose2d: " + targetPose.getX() + ", " + targetPose.getY() + ", " + targetPose.getRotation().getDegrees());
-        
+        robotContainer.MaxSpeed = (TunerConstants.kSpeedAt12Volts.in(MetersPerSecond));
     }
 
     // Called every 20ms to perform actions of Command
@@ -198,7 +204,12 @@ public class AlignReef extends Command{
         SmartDashboard.putNumberArray("Current Pose", new double[]{currentPose.getX(), currentPose.getY(), currentPose.getRotation().getDegrees()});
         SmartDashboard.putNumberArray("Target Vector", new double[]{velocities[0], velocities[1], velocities[2]});
         // Moves the drivetrain
-        drivetrain.setControl(driveRequest.withVelocityX(velocities[0]).withVelocityY(velocities[1]).withRotationalRate(velocities[2]));
+        if (Constants.contains(new double[]{6, 7, 8, 9, 10, 11}, tID)){
+            drivetrain.setControl(driveRequest.withVelocityX(-velocities[0]).withVelocityY(-velocities[1]).withRotationalRate(velocities[2]));
+        }
+        else{
+            drivetrain.setControl(driveRequest.withVelocityX(velocities[0]).withVelocityY(velocities[1]).withRotationalRate(velocities[2]));
+        }
 
     }
 
@@ -315,7 +326,7 @@ public class AlignReef extends Command{
     public void end(boolean interrupted){
         // Ensures drivetrain stops
         drivetrain.setControl(stop);
-
+        robotContainer.MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 2;
         if (interrupted) {
             System.out.println("AlignReef interrupted.");
         } 

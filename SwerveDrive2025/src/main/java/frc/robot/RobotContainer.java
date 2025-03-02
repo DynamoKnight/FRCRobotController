@@ -29,8 +29,8 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 
 public class RobotContainer {
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 2; // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    public double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 2; // kSpeedAt12Volts desired top speed
+    public double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -64,7 +64,7 @@ public class RobotContainer {
         // Creates a Named Command, that can be accessed in path planner5
         NamedCommands.registerCommand("Raise L4", setPosition(3).until(() -> Math.abs(39 - elevator.getPosition()) < 0.5));
         NamedCommands.registerCommand("Score L4", CoralOuttake());
-        NamedCommands.registerCommand("Lower", setPosition(0).until(() -> Math.abs(0.25 - elevator.getPosition()) < 0.5));
+        NamedCommands.registerCommand("Raise L0", setPosition(0).until(() -> Math.abs(0.25 - elevator.getPosition()) < 0.5));
         NamedCommands.registerCommand("Align Left", new AlignReef(this, ReefPos.LEFT).withTimeout(3));
         NamedCommands.registerCommand("Align Right", new AlignReef(this, ReefPos.RIGHT).withTimeout(3));
 
@@ -94,11 +94,13 @@ public class RobotContainer {
                 dumpRoller.dropCoral(.2).withTimeout(.5),
                 dumpRoller.keepCoral().withTimeout(.1),
                 // Drops to Level 1 after done
-                setPosition(0)
+                setPosition(0).withTimeout(1.25)
             );
         }
          
     }
+
+
 
     // Moves the elevator to the position based on the list
     private Command setPosition(int pos){
@@ -151,6 +153,10 @@ public class RobotContainer {
         // Aligns to the reef april tag, left side
         joystick.leftTrigger().whileTrue(new AlignReef(this, Constants.ReefPos.LEFT));
 
+        //overdrive button
+        joystick.b().toggleOnTrue(increaseSpeed());
+        joystick.a().toggleOnTrue(decreaseSpeed());
+
         /////////////////////////////
         // OPERATOR CONTROL
         /////////////////////////////
@@ -170,6 +176,18 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         /* Run the path selected from the auto chooser */
         return autoChooser.getSelected();
+    }
+
+    public Command increaseSpeed(){
+        return Commands.run(() -> MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond));
+    }
+
+    public Command decreaseSpeed(){
+        return Commands.run(() -> MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 2);
+    }
+
+    public void setSpeed(double speed){
+
     }
     
 }

@@ -7,19 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Startline to Reef"
+            "pathName": "Top Startline to Reef"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Align Left"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
+            "name": "Align Right"
           }
         },
         {
@@ -44,7 +38,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Reef to Coral Stattion 1"
+            "pathName": "Top Reef to Coral Stattion 1"
           }
         },
         {
@@ -62,56 +56,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Coral Station to Reef 1"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Align Left"
-          }
-        },
-        {
-          "type": "sequential",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Raise L4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Score L4"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Score 2 to Pickup"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Raise L0"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Coral Station to Reef 2"
+            "pathName": "Top Coral Station to Reef 1"
           }
         },
         {

@@ -17,12 +17,6 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
           "type": "sequential",
           "data": {
             "commands": [
@@ -36,12 +30,6 @@
                 "type": "named",
                 "data": {
                   "name": "Score L4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Lower"
                 }
               }
             ]
@@ -86,12 +74,6 @@
                 "data": {
                   "name": "Score L4"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Lower"
-                }
               }
             ]
           }
@@ -134,12 +116,6 @@
                 "type": "named",
                 "data": {
                   "name": "Score L4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Lower"
                 }
               }
             ]

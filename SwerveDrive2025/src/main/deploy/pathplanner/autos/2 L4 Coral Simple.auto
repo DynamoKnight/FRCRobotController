@@ -13,7 +13,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Align Left"
+            "name": "Align Right"
           }
         },
         {
@@ -35,25 +35,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Start Wheel"
-                }
-              },
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 0.25
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Stop Wheel"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Lower"
+                  "name": "Score L4"
                 }
               }
             ]
@@ -63,6 +45,12 @@
           "type": "path",
           "data": {
             "pathName": "Reef to Coral Stattion 1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Raise L0"
           }
         },
         {
@@ -96,7 +84,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Lower"
+                  "name": "Score L4"
                 }
               }
             ]
