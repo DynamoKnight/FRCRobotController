@@ -145,10 +145,12 @@ public class AlignReef extends Command{
         // Reef Offset Positions - log the chosen offsets
         if (Constants.contains(new double[]{6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22}, tID)){
             if (reefPos == ReefPos.LEFT){
+                System.out.println("left");
                 offsetX = -0.2124;
                 offsetY = 0.1;
             }
             else if (reefPos == ReefPos.RIGHT){
+                System.out.println("right");
                 offsetX = -0.2124;
                 offsetY = -0.21;
             }
@@ -237,7 +239,7 @@ public class AlignReef extends Command{
         SmartDashboard.putNumberArray("Target Vector", new double[]{velocities[0], velocities[1], velocities[2]});
         Logger.recordOutput("Reefscape/AlignReef/Velocities", velocities);
 
-    // Log velocity command and direction flip for certain tags
+    // Log velocity command and direction flip for certain tags 
     boolean isFlippingDirection = Constants.contains(new double[]{6, 7, 8, 9, 10, 11}, tID);
     Logger.recordOutput("Reefscape/AlignReef/FlippedDirection", isFlippingDirection);
 
