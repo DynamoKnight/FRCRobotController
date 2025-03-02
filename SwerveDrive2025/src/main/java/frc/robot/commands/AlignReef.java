@@ -82,23 +82,34 @@ public class AlignReef extends Command{
         this.reefPos = reefPos;
         // -180 and 180 degrees are the same point, so its continuous
         pidRotate.enableContinuousInput(-Math.PI, Math.PI);
+
+        // Added Logging
+        System.out.println("AlignReef command created for " + reefPos + " position");
+        Logger.recordOutput("Reefscape/AlignReef/ReefPosition", reefPos.toString());
     }  
     
     @Override
     public void initialize(){
         // Starts timer
         timer.restart();
+        Logger.recordOutput("Reefscape/AlignReef/CommandStarted", true);
+        Logger.recordOutput("Reefscape/AlignReef/StartTime", timer.get());
+        
         // Gets the tag ID that is being targeted
         tID = limelight.getTid();
+        Logger.recordOutput("Reefscape/AlignReef/TargetTagID", tID);
+        
         double[] aprilTagList = Constants.AprilTagMaps.aprilTagMap.get(tID);
         // Checks if the tag exists within the list of all tags
         if (aprilTagList == null) {
             System.out.println("Error: Target pose array is null for Tag ID: " + tID);
+            Logger.recordOutput("Reefscape/AlignReef/Error", "Target pose array is null for Tag ID: " + tID);
             // Command is useless, thus it will end
             tagDetected = false;
             return;
         }
         Pose2d aprilTagPose = new Pose2d(aprilTagList[0] * Constants.inToM, aprilTagList[1] * Constants.inToM, new Rotation2d(aprilTagList[3] * Math.PI / 180));
+        Logger.recordOutput("Reefscape/AlignReef/AprilTagPose", aprilTagPose);
         /*
         // Sets the April Tag Field Layout for Reefscape
         try {
@@ -129,7 +140,9 @@ public class AlignReef extends Command{
         }
         */
         tagDetected = true;
-        // Reef Offset Positions
+        Logger.recordOutput("Reefscape/AlignReef/TagDetected", tagDetected);
+        
+        // Reef Offset Positions - log the chosen offsets
         if (Constants.contains(new double[]{6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22}, tID)){
             if (reefPos == ReefPos.LEFT){
                 offsetX = -0.2124;
@@ -139,19 +152,25 @@ public class AlignReef extends Command{
                 offsetX = -0.2124;
                 offsetY = -0.21;
             }
+            Logger.recordOutput("Reefscape/AlignReef/OffsetX", offsetX);
+            Logger.recordOutput("Reefscape/AlignReef/OffsetY", offsetY);
         }
+        
         // The target rotation of the robot is opposite of the april tag's rotation
         double targetRotation = aprilTagPose.getRotation().getRadians() - Math.PI;
         // AngleModulus normalizes the difference to always take the shortest path
         targetRotation = MathUtil.angleModulus(targetRotation);
+        Logger.recordOutput("Reefscape/AlignReef/TargetRotation", targetRotation);
 
-        // Creates a Rotation2D of the target rotation of the robot (radians)
-        Rotation2d yaw = new Rotation2d(targetRotation);
-        // Calculates offset based on robots rotation
+        // Log offsets after rotation calculations
         double newOffsetX = (offsetX * Math.cos(targetRotation)) - (offsetY * Math.sin(targetRotation));
         double newOffsetY = (offsetX * Math.sin(targetRotation)) + ((offsetY * Math.cos(targetRotation)));
+        Logger.recordOutput("Reefscape/AlignReef/RotatedOffsetX", newOffsetX);
+        Logger.recordOutput("Reefscape/AlignReef/RotatedOffsetY", newOffsetY);
+        
         // Creates a Pose2d for the target position
-        targetPose = new Pose2d(aprilTagPose.getX() + newOffsetX, aprilTagPose.getY() + newOffsetY, yaw);
+        targetPose = new Pose2d(aprilTagPose.getX() + newOffsetX, aprilTagPose.getY() + newOffsetY, new Rotation2d(targetRotation));
+        Logger.recordOutput("Reefscape/AlignReef/TargetPose", targetPose);
 
         // Sets the destination to go to for the PID
         pidX.setSetpoint(targetPose.getX());
@@ -168,43 +187,62 @@ public class AlignReef extends Command{
     public void execute(){
         // Gets current robot Pose2d
         Pose2d currentPose = drivetrain.getState().Pose;
+        Logger.recordOutput("Reefscape/AlignReef/CurrentPose", currentPose);
+        
         // If no tag was detected, then Command wont execute
         if (!tagDetected){
+            Logger.recordOutput("Reefscape/AlignReef/ExecuteSkipped", true);
             return;
-        }        
+        }
+        Logger.recordOutput("Reefscape/AlignReef/ExecuteTime", timer.get());
+        
         // List of X, Y, Yaw velocities to go to target pose
         double[] velocities;
+        
         // PID Alignment
         if (usingPID){
             double yawError = MathUtil.angleModulus(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
+            Logger.recordOutput("Reefscape/AlignReef/YawError", yawError);
+            
             // Rotates first
             if (Math.abs(yawError) > yawTolerance){
+                Logger.recordOutput("Reefscape/AlignReef/Phase", "Rotation (PID)");
                 velocities = calculateRotationalErrorPID(currentPose);
             }
             else{
+                Logger.recordOutput("Reefscape/AlignReef/Phase", "Translation (PID)");
                 velocities = calculateErrorPID(currentPose);
             }
-            
         }
         // Regular Alignment
         else{
             double yawError = MathUtil.angleModulus(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
+            Logger.recordOutput("Reefscape/AlignReef/YawError", yawError);
+            
             // Rotates first
             if (Math.abs(yawError) > yawTolerance){
+                Logger.recordOutput("Reefscape/AlignReef/Phase", "Rotation");
                 velocities = rotate();
             }
             // Moves, rotation is already done
             else{
+                Logger.recordOutput("Reefscape/AlignReef/Phase", "Translation");
                 velocities = calculateError(currentPose);
             }
-           
         }
+        
         // Logs values
         SmartDashboard.putNumberArray("Target Pose", new double[]{targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()});
         SmartDashboard.putNumberArray("Current Pose", new double[]{currentPose.getX(), currentPose.getY(), currentPose.getRotation().getDegrees()});
         SmartDashboard.putNumberArray("Target Vector", new double[]{velocities[0], velocities[1], velocities[2]});
+        Logger.recordOutput("Reefscape/AlignReef/Velocities", velocities);
+
+    // Log velocity command and direction flip for certain tags
+    boolean isFlippingDirection = Constants.contains(new double[]{6, 7, 8, 9, 10, 11}, tID);
+    Logger.recordOutput("Reefscape/AlignReef/FlippedDirection", isFlippingDirection);
+
         // Moves the drivetrain
-        if (Constants.contains(new double[]{6, 7, 8, 9, 10, 11}, tID)){
+        if (isFlippingDirection){
             drivetrain.setControl(driveRequest.withVelocityX(-velocities[0]).withVelocityY(-velocities[1]).withRotationalRate(velocities[2]));
         }
         else{
@@ -219,9 +257,12 @@ public class AlignReef extends Command{
          Translation2d error = targetPose.getTranslation().minus(currentPose.getTranslation());
          // Finds the hypotenuse distance to the desired point
          double distance = error.getNorm();
+         Logger.recordOutput("Reefscape/AlignReef/TranslationError", new double[]{error.getX(), error.getY()});
+         Logger.recordOutput("Reefscape/AlignReef/Distance", distance);
          // This gets the robots current rotation (rad)
          // AngleModulus normalizes the difference to always take the shortest path
          double yawError = MathUtil.angleModulus(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
+         Logger.recordOutput("Reefscape/AlignReef/YawError", yawError);
 
          // Intitializes rotation rates
          double velocityX = 0.0;
@@ -249,8 +290,10 @@ public class AlignReef extends Command{
             velocityYaw = 0;
         }
         // Returns the X, Y, Yaw powers
-        return new double[]{velocityX, velocityY, 0};
-    }
+        double[] result = new double[]{velocityX, velocityY, 0};
+        Logger.recordOutput("Reefscape/AlignReef/CalculatedVelocities", result);
+        return result;
+    }   
 
     // Calculates the needed velocities to get to the target pose with PID
     private double[] calculateErrorPID(Pose2d currentPose){
@@ -264,17 +307,26 @@ public class AlignReef extends Command{
 
         Logger.recordOutput("Reefscape/Limelight/x error", pidX.getError());
         Logger.recordOutput("Reefscape/Limelight/y error", pidY.getError());
+        Logger.recordOutput("Reefscape/Limelight/PIDOutputX", velocityX);
+        Logger.recordOutput("Reefscape/Limelight/PIDOutputY", velocityY);
 
         // Returns the X, Y, Yaw powers
-        return new double[]{velocityX, velocityY, 0};
+        double[] result = new double[]{velocityX, velocityY, 0};
+        Logger.recordOutput("Reefscape/AlignReef/CalculatedPIDVelocities", result);
+        return result;
     }
 
     private double[] calculateRotationalErrorPID(Pose2d currentPose){
         // Calculate the rotational power and clamp it between -2 and 2
         double velocityYaw = pidRotate.calculate(currentPose.getRotation().getRadians());
         velocityYaw = MathUtil.clamp(velocityYaw, -2, 2);
+        Logger.recordOutput("Reefscape/AlignReef/RotationalError", pidRotate.getError());
+        Logger.recordOutput("Reefscape/AlignReef/PIDOutputYaw", velocityYaw);
+        
         // Returns the X, Y, Yaw powers
-        return new double[]{0, 0, velocityYaw};
+        double[] result = new double[]{0, 0, velocityYaw};
+        Logger.recordOutput("Reefscape/AlignReef/CalculatedRotationPIDVelocities", result);
+        return result;
     }
 
     // Returns the velocity for the yaw
