@@ -27,6 +27,8 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.DumpRollerSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
+import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.commands.MoveArmCommand;
 
 public class RobotContainer {
     public double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 2; // kSpeedAt12Volts desired top speed
@@ -52,6 +54,7 @@ public class RobotContainer {
     public final ElevatorSubsystem elevator = new ElevatorSubsystem();
     public final DumpRollerSubsystem dumpRoller = new DumpRollerSubsystem();
     public final LimelightSubsystem limelight = new LimelightSubsystem(this);
+    private final ArmSubsystem arm = new ArmSubsystem();
 
      // Represents a list of the number of rotations to get to each level
      Double[] positions = {0.25, 11.0, 21.5, 39.0};
@@ -171,6 +174,15 @@ public class RobotContainer {
         joystick2.y().onTrue(setPosition(3));
         // Outtakes coral
         joystick2.rightTrigger().onTrue(CoralOuttake());
+s
+        // ARM CONTROLS //
+
+        // Move arm up while left bumper is held
+        joystick2.leftBumper().whileTrue(moveArmUpCommand());
+                
+        // Move arm down while right bumper is held
+        joystick2.rightBumper().whileTrue(moveArmDownCommand());
+
     }
 
     public Command getAutonomousCommand() {
