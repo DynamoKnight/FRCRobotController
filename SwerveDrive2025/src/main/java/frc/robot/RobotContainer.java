@@ -28,7 +28,6 @@ import frc.robot.subsystems.DumpRollerSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.ArmSubsystem;
-import frc.robot.commands.MoveArmCommand;
 
 public class RobotContainer {
     public double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 2; // kSpeedAt12Volts desired top speed
@@ -54,24 +53,29 @@ public class RobotContainer {
     public final ElevatorSubsystem elevator = new ElevatorSubsystem();
     public final DumpRollerSubsystem dumpRoller = new DumpRollerSubsystem();
     public final LimelightSubsystem limelight = new LimelightSubsystem(this);
-    private final ArmSubsystem arm = new ArmSubsystem();
+    public final ArmSubsystem arm = new ArmSubsystem();
 
-     // Represents a list of the number of rotations to get to each level
-     Double[] positions = {0.25, 11.0, 21.5, 39.0};
-     int pos = 0;
+    // Represents a list of the number of rotations to get to each level
+    Double[] positions = {0.25, 11.0, 21.5, 39.0};
+    int pos = 0;
 
     /* Path follower */
     private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
         // Creates a Named Command, that can be accessed in path planner5
-        NamedCommands.registerCommand("Raise L4", setPosition(3).until(() -> Math.abs(39 - elevator.getPosition()) < 0.5));
-        NamedCommands.registerCommand("Score L4", CoralOuttake());
-        NamedCommands.registerCommand("Raise L0", setPosition(0).until(() -> Math.abs(0.25 - elevator.getPosition()) < 0.5));
+        // Raises Elevator to Level 4
+        NamedCommands.registerCommand("Raise L4", setPosition(3).until(() -> Math.abs(positions[3] - elevator.getPosition()) < 0.5));
+        // Raises Elevator to Level 4
+        NamedCommands.registerCommand("Raise L0", setPosition(0).until(() -> Math.abs(positions[0] - elevator.getPosition()) < 0.5));
+        // Outtakes Coral
+        NamedCommands.registerCommand("Score", CoralOuttake());
+        // Aligns to the Left Reef side
         NamedCommands.registerCommand("Align Left", new AlignReef(this, ReefPos.LEFT).withTimeout(3));
+        // Aligns to the Right Reef side
         NamedCommands.registerCommand("Align Right", new AlignReef(this, ReefPos.RIGHT).withTimeout(3));
 
-        // Adds an auto
+        // Adds Autos to SmartDashboard
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
 
@@ -174,14 +178,17 @@ public class RobotContainer {
         joystick2.y().onTrue(setPosition(3));
         // Outtakes coral
         joystick2.rightTrigger().onTrue(CoralOuttake());
-s
         // ARM CONTROLS //
 
         // Move arm up while left bumper is held
-        joystick2.leftBumper().whileTrue(moveArmUpCommand());
+        joystick2.leftBumper().onTrue(arm.moveArmUpCommand());
                 
         // Move arm down while right bumper is held
-        joystick2.rightBumper().whileTrue(moveArmDownCommand());
+        joystick2.rightBumper().onTrue(arm.moveArmDownCommand());
+        // Opens the arm
+        joystick2.povUp().whileTrue(arm.setArm(0));
+        // Closes  the arm
+        joystick2.povUp().whileTrue(arm.setArm(1));
 
     }
 
