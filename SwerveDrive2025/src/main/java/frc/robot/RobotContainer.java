@@ -107,8 +107,6 @@ public class RobotContainer {
          
     }
 
-
-
     // Moves the elevator to the position based on the list
     private Command setPosition(int pos){
         this.pos = pos;
@@ -180,15 +178,17 @@ public class RobotContainer {
         joystick2.rightTrigger().onTrue(CoralOuttake());
         // ARM CONTROLS //
 
-        // Move arm up while left bumper is held
-        joystick2.leftBumper().onTrue(arm.moveArmUpCommand());
+        // Move arm down while left bumper is held
+        joystick2.leftBumper().whileTrue(arm.moveDown()).onFalse(arm.stopArm());
                 
-        // Move arm down while right bumper is held
-        joystick2.rightBumper().onTrue(arm.moveArmDownCommand());
+        // Move arm up while right bumper is held
+        joystick2.rightBumper().whileTrue(arm.moveUp()).onFalse(arm.stopArm());
         // Opens the arm
-        joystick2.povUp().whileTrue(arm.setArm(0));
-        // Closes  the arm
-        joystick2.povUp().whileTrue(arm.setArm(1));
+        joystick2.povUp().whileTrue(arm.setArmUp());
+        // Closes the arm
+        joystick2.povDown().whileTrue(arm.setArmDown());
+        // Spins the spin wheels
+        joystick2.leftTrigger().whileTrue(arm.spinWheels()).onFalse(arm.stopWheels());
 
     }
 

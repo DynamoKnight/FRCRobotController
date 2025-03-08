@@ -305,7 +305,7 @@ public class AlignReef extends Command{
     // Called once Command ends
     @Override
     public void end(boolean interrupted){
-        // Ensures drivetrain stops
+        // Ensures drivetrain stop
         drivetrain.setControl(stop);
         robotContainer.MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 2;
         if (interrupted) {
