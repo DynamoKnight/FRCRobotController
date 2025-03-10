@@ -57,7 +57,7 @@ public class AlignReef extends Command{
     // The tolerance before stopping align (meters)
     private final double positionTolerance = 0.01;
     // The tolerance for yaw alignment (radians)
-    private final double yawTolerance = Math.PI / 64;
+    private final double yawTolerance = Math.PI / 32;
     // Indicates if alignment uses PID Control
     private final boolean usingPID = false;
 
@@ -146,13 +146,13 @@ public class AlignReef extends Command{
         if (Constants.contains(new double[]{6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22}, tID)){
             if (reefPos == ReefPos.LEFT){
                 System.out.println("left");
-                offsetX = -0.2124;
-                offsetY = 0.1;
+                offsetX = -0.4524;
+                offsetY = 0.13;
             }
             else if (reefPos == ReefPos.RIGHT){
                 System.out.println("right");
-                offsetX = -0.2124;
-                offsetY = -0.21;
+                offsetX = -0.4524;
+                offsetY = -0.23;
             }
             Logger.recordOutput("Reefscape/AlignReef/OffsetX", offsetX);
             Logger.recordOutput("Reefscape/AlignReef/OffsetY", offsetY);
@@ -357,7 +357,7 @@ public class AlignReef extends Command{
     public boolean isFinished(){
         // If a tag wasn't detected, command will end
         if (!tagDetected){
-            return true;
+            //return true;
         }
         // Without PID, it will check until the tolerance is reached
         if (!usingPID){

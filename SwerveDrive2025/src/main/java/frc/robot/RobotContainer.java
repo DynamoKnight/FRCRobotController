@@ -23,6 +23,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.ReefPos;
 import frc.robot.commands.AlignReef;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.ArmWheelSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.DumpRollerSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -52,9 +54,11 @@ public class RobotContainer {
     public final ElevatorSubsystem elevator = new ElevatorSubsystem();
     public final DumpRollerSubsystem dumpRoller = new DumpRollerSubsystem();
     public final LimelightSubsystem limelight = new LimelightSubsystem(this);
+    public final ArmSubsystem arm = new ArmSubsystem();
+    public final ArmWheelSubsystem wheel = new ArmWheelSubsystem();
 
      // Represents a list of the number of rotations to get to each level
-     Double[] positions = {0.25, 11.0, 21.5, 39.0};
+     Double[] positions = {0.95, 10.5, 21.5, 39.0};
      int pos = 0;
 
     /* Path follower */
@@ -63,10 +67,11 @@ public class RobotContainer {
     public RobotContainer() {
         // Creates a Named Command, that can be accessed in path planner5
         NamedCommands.registerCommand("Raise L4", setPosition(3).until(() -> Math.abs(39 - elevator.getPosition()) < 0.5));
-        NamedCommands.registerCommand("Score L4", CoralOuttake());
-        NamedCommands.registerCommand("Raise L0", setPosition(0).until(() -> Math.abs(0.25 - elevator.getPosition()) < 0.5));
-        NamedCommands.registerCommand("Align Left", new AlignReef(this, ReefPos.LEFT).withTimeout(3));
-        NamedCommands.registerCommand("Align Right", new AlignReef(this, ReefPos.RIGHT).withTimeout(3));
+        NamedCommands.registerCommand("Score L4", dumpRoller.dropCoral(.2).withTimeout(.5));
+        NamedCommands.registerCommand("Wheel Stop",dumpRoller.keepCoral().withTimeout(.01));
+        NamedCommands.registerCommand("Raise L0", setPosition(0).until(() -> Math.abs(0.975 - elevator.getPosition()) < 0.5));
+        NamedCommands.registerCommand("Align Left", new AlignReef(this, ReefPos.LEFT).withTimeout(1.5));
+        NamedCommands.registerCommand("Align Right", new AlignReef(this, ReefPos.RIGHT).withTimeout(1.5));
 
         // Adds an auto
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
@@ -76,6 +81,8 @@ public class RobotContainer {
         // Open Loop doesn't use feedback, Close Loop uses feedback
         elevator.setDefaultCommand(elevator.setOpenLoop(() -> 0.2));
         dumpRoller.setDefaultCommand(dumpRoller.keepCoral());
+        arm.setDefaultCommand(arm.holdPos());
+        wheel.setDefaultCommand(wheel.stopWheels());
 
         // Configures the Bindings
         configureBindings();
@@ -144,14 +151,14 @@ public class RobotContainer {
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // Reset the field-centric heading on left bumper press
-        joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        joystick.y().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
 
         // Aligns to the reef april tag, right side
-        joystick.rightTrigger().whileTrue(new AlignReef(this, Constants.ReefPos.RIGHT));
+        joystick.rightBumper().whileTrue(new AlignReef(this, Constants.ReefPos.RIGHT));
         // Aligns to the reef april tag, left side
-        joystick.leftTrigger().whileTrue(new AlignReef(this, Constants.ReefPos.LEFT));
+        joystick.leftBumper().whileTrue(new AlignReef(this, Constants.ReefPos.LEFT));
 
         //overdrive button
         joystick.b().toggleOnTrue(increaseSpeed());
@@ -169,8 +176,18 @@ public class RobotContainer {
         joystick2.x().onTrue(setPosition(2));
         // Level 4
         joystick2.y().onTrue(setPosition(3));
-        // Outtakes coral
-        joystick2.rightTrigger().onTrue(CoralOuttake());
+        // Outtakes coral(drive actully lol)
+        joystick.rightTrigger().onTrue(CoralOuttake());
+
+        // Toggle arm
+
+        joystick2.rightBumper().whileTrue(arm.moveUp());
+        joystick2.leftBumper().whileTrue(arm.moveDown());
+
+        // Toggles arm wheels
+        joystick2.povUp().whileTrue(wheel.clockwiseWheels());
+        joystick2.povDown().whileTrue(wheel.counterClockwiseWheels());
+
     }
 
     public Command getAutonomousCommand() {

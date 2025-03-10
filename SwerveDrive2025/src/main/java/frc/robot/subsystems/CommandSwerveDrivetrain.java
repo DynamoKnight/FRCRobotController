@@ -72,7 +72,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     );
 
     /* SysId routine for characterizing steer. This is used to find PID gains for the steer motors. */
-    private final SysIdRoutine m_sysIdRoutineSteer = new SysIdRoutine(
+    private final SysIdRoutine F = new SysIdRoutine(
         new SysIdRoutine.Config(
             null,        // Use default ramp rate (1 V/s)
             Volts.of(7), // Use dynamic voltage of 7 V
@@ -94,7 +94,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
         Logger.recordOutput("Vision", x.pose);
         if (x.tagCount != 0){
-            addVisionMeasurement(x.pose, Utils.getCurrentTimeSeconds());
+            addVisionMeasurement(x.pose, Utils.fpgaToCurrentTime(x.timestampSeconds));
         }
     }
 

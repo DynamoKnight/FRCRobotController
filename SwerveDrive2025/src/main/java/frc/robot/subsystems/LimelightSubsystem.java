@@ -77,6 +77,7 @@ public class LimelightSubsystem extends SubsystemBase {
             LimelightHelpers.SetRobotOrientation("limelight", headingDeg, 0, 0, 0, 0, 0);
             // Retrieves the robots pose estimation on the field from the Blue Origin using Megatag 2
             var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+            llMeasurement = null; // using both megatag 1 and 2?? Im just keeping the 1 from CommandSwerveDrivetrain - kevin
             if (llMeasurement != null && llMeasurement.tagCount > 0 && omegaRps < 2.0) {
                 // Adds the limelight pose estimate to the drivetrain's odometry calculation
                 m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, Utils.fpgaToCurrentTime(llMeasurement.timestampSeconds));

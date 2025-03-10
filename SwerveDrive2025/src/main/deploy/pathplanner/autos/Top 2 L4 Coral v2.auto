@@ -31,20 +31,39 @@
                 "data": {
                   "name": "Score L4"
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Wheel Stop"
+                }
               }
             ]
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Top Reef to Coral Station 1"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Raise L0"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Top Reef to Coral Station 1"
+                }
+              }
+            ]
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.0
+            "waitTime": 0.5
           }
         },
         {
@@ -74,51 +93,39 @@
                 "data": {
                   "name": "Score L4"
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Wheel Stop"
+                }
               }
             ]
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "Top Reef to Coral Station 2"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Top Coral Station to Reef 3"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Align Right"
-          }
-        },
-        {
-          "type": "sequential",
+          "type": "parallel",
           "data": {
             "commands": [
               {
                 "type": "named",
                 "data": {
-                  "name": "Raise L4"
+                  "name": "Raise L0"
                 }
               },
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "Score L4"
+                  "pathName": "Top Reef to Coral Station 2"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
           }
         }
       ]

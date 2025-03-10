@@ -45,12 +45,12 @@
             // Reaction to change in error, lessens overshooting
             config.Slot0.kD = 0;   
             // Feedforward
-            config.Slot0.kG = 0.7;        
-            config.Slot0.kS = 0.7;
+            config.Slot0.kG = 0.4;        
+            config.Slot0.kS = 0.4;
             config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
             // Motion Magic
             config.MotionMagic.MotionMagicCruiseVelocity = 100;
-            config.MotionMagic.MotionMagicAcceleration = 120;
+            config.MotionMagic.MotionMagicAcceleration = 250;
             // Current limits
             config.CurrentLimits.SupplyCurrentLimit = 40;
             config.CurrentLimits.SupplyCurrentLimitEnable = true;
