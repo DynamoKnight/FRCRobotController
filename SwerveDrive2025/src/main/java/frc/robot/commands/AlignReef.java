@@ -73,8 +73,8 @@ public class AlignReef extends Command{
         this.robotContainer = robotContainer;
         this.drivetrain = robotContainer.drivetrain;
         this.limelight = robotContainer.limelight;
-
         this.reefPos = reefPos;
+
         // -180 and 180 degrees are the same point, so its continuous
         pidRotate.enableContinuousInput(-Math.PI, Math.PI);
 
@@ -103,8 +103,9 @@ public class AlignReef extends Command{
             tagDetected = false;
             return;
         }
+        // Creates a Pose2D of the April Tag's position
         Pose2d aprilTagPose = new Pose2d(aprilTagList[0] * Constants.inToM, aprilTagList[1] * Constants.inToM, new Rotation2d(aprilTagList[3] * Math.PI / 180));
-        
+        // Tag is detected
         tagDetected = true;
         Logger.recordOutput("Reefscape/AlignReef/TagDetected", tagDetected);
         Logger.recordOutput("Reefscape/AlignReef/AprilTagPose", aprilTagPose);
@@ -162,22 +163,21 @@ public class AlignReef extends Command{
         Pose2d currentPose = drivetrain.getState().Pose;
         Logger.recordOutput("Reefscape/AlignReef/CurrentPose", currentPose);
         Logger.recordOutput("Reefscape/AlignReef/ExecuteTime", timer.get());
+        // Gets rotational error
+        double yawError = MathUtil.angleModulus(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
+        Logger.recordOutput("Reefscape/AlignReef/YawError", yawError);
         
         // List of X, Y, Yaw velocities to go to target pose
         double[] velocities;
         
         // PID Alignment
         if (usingPID){
-            double yawError = MathUtil.angleModulus(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
-            Logger.recordOutput("Reefscape/AlignReef/YawError", yawError);
-            
+            // Calculates required velocities, rotates before moving
             velocities = calculateErrorPID(currentPose, true);
         }
         // Regular Alignment
-        else{
-            double yawError = MathUtil.angleModulus(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
-            Logger.recordOutput("Reefscape/AlignReef/YawError", yawError);
-            
+        else{ 
+            // Calculates required velocities, rotates before moving           
             velocities = calculateError(currentPose, true);
         }
         
@@ -187,7 +187,7 @@ public class AlignReef extends Command{
         SmartDashboard.putNumberArray("Target Vector", new double[]{velocities[0], velocities[1], velocities[2]});
         Logger.recordOutput("Reefscape/AlignReef/Velocities", velocities);
 
-        // Log velocity command and direction flip for certain tags 
+        // The direction flips for the red side
         boolean isFlippingDirection = Constants.contains(new double[]{6, 7, 8, 9, 10, 11}, tID);
         Logger.recordOutput("Reefscape/AlignReef/FlippedDirection", isFlippingDirection);
 
@@ -251,16 +251,17 @@ public class AlignReef extends Command{
 
     // Calculates the needed velocities to get to the target pose with PID
     private double[] calculateErrorPID(Pose2d currentPose, boolean rotateFirst){
-        // Calculate the power for X direction and clamp it between -1 and 1
+        // Calculates the power for X direction and clamp it between -1 and 1
         double velocityX = pidX.calculate(currentPose.getX());
         velocityX = MathUtil.clamp(velocityX, -speed, speed);
         
-        // Calculate the power for Y direction and clamp it between -1 and 1
+        // Calculates the power for Y direction and clamp it between -1 and 1
         double velocityY = pidY.calculate(currentPose.getY());
         velocityY = MathUtil.clamp(velocityY, -speed, speed);
-
+        // Calculates the power for the Rotation direction and clamps it between -2 and 2
         double velocityYaw = pidRotate.calculate(currentPose.getRotation().getRadians());
         velocityYaw = MathUtil.clamp(velocityYaw, -2, 2);
+        // Logs PID values
         Logger.recordOutput("Reefscape/Limelight/x error", pidX.getError());
         Logger.recordOutput("Reefscape/Limelight/y error", pidY.getError());
         Logger.recordOutput("Reefscape/AlignReef/RotationalError", pidRotate.getError());

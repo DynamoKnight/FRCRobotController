@@ -74,7 +74,7 @@ public class RobotContainer {
         // Outtakes Dump Roller on Reef
         NamedCommands.registerCommand("Score", CoralOuttake());
         // Stops the Dump Roller
-        NamedCommands.registerCommand("Wheel Stop", dumpRoller.keepCoral().withTimeout(.01));
+        NamedCommands.registerCommand("Stop Dump Roller", dumpRoller.keepCoral().withTimeout(.01));
         // Aligns to the Left Reef side
         NamedCommands.registerCommand("Align Left", new AlignReef(this, ReefPos.LEFT).withTimeout(1.5));
         // Aligns to the Right Reef side
@@ -93,31 +93,6 @@ public class RobotContainer {
 
         // Configures the Bindings
         configureBindings();
-    }
-
-    // Sets different powers for different levels
-    private Command CoralOuttake(){
-        // Level 1 outake
-        if (pos == 0){
-            return dumpRoller.dropCoral(.2).withTimeout(.5);
-        }
-        // Levels 2, 3, 4 outtake
-        else{
-            // Sequence of Commands
-            return Commands.sequence(
-                dumpRoller.dropCoral(.2).withTimeout(.5),
-                dumpRoller.keepCoral().withTimeout(.1),
-                // Drops to Level 1 after done
-                setPosition(0).withTimeout(1.25)
-            );
-        }
-         
-    }
-
-    // Moves the elevator to the position based on the list
-    private Command setPosition(int pos){
-        this.pos = pos;
-        return elevator.setCloseLoop(() -> positions[pos]);
     }
 
     // Configures the bindings
@@ -202,6 +177,34 @@ public class RobotContainer {
         // Spins the spin wheels
         joystick2.leftTrigger().whileTrue(arm.spinWheels()).onFalse(arm.stopWheels());*/
 
+    }
+
+    // Outtakes Dump Roller Coral onto Reef
+    private Command CoralOuttake(){
+        // Level 1 outake
+        if (pos == 0){
+            // Sequence of Commands
+            return Commands.sequence(
+                dumpRoller.dropCoral(.2).withTimeout(.5),
+                dumpRoller.keepCoral().withTimeout(.1)
+            );
+        }
+        // Levels 2, 3, 4 outtake
+        else{
+            return Commands.sequence(
+                dumpRoller.dropCoral(.2).withTimeout(.5),
+                dumpRoller.keepCoral().withTimeout(.1),
+                // Drops to Level 1 after done
+                setPosition(0).withTimeout(1.25)
+            );
+        }
+         
+    }
+
+    // Moves the elevator to the position based on the list
+    private Command setPosition(int pos){
+        this.pos = pos;
+        return elevator.setCloseLoop(() -> positions[pos]);
     }
 
     public Command getAutonomousCommand() {
