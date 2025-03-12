@@ -81,7 +81,7 @@ public class RobotContainer {
         // Open Loop doesn't use feedback, Close Loop uses feedback
         elevator.setDefaultCommand(elevator.setOpenLoop(() -> 0.2));
         dumpRoller.setDefaultCommand(dumpRoller.keepCoral());
-        arm.setDefaultCommand(arm.holdPos());
+        arm.setDefaultCommand(arm.stopArm());
         wheel.setDefaultCommand(wheel.stopWheels());
 
         // Configures the Bindings
@@ -160,9 +160,12 @@ public class RobotContainer {
         // Aligns to the reef april tag, left side
         joystick.leftBumper().whileTrue(new AlignReef(this, Constants.ReefPos.LEFT));
 
-        //overdrive button
+        // Overdrive button for speed
         joystick.b().toggleOnTrue(increaseSpeed());
         joystick.a().toggleOnTrue(decreaseSpeed());
+
+        // Outtakes coral 
+        joystick.rightTrigger().onTrue(CoralOuttake());
 
         /////////////////////////////
         // OPERATOR CONTROL
@@ -176,11 +179,8 @@ public class RobotContainer {
         joystick2.x().onTrue(setPosition(2));
         // Level 4
         joystick2.y().onTrue(setPosition(3));
-        // Outtakes coral(drive actully lol)
-        joystick.rightTrigger().onTrue(CoralOuttake());
 
         // Toggle arm
-
         joystick2.rightBumper().whileTrue(arm.moveUp());
         joystick2.leftBumper().whileTrue(arm.moveDown());
 

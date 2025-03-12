@@ -23,10 +23,8 @@ public class ArmSubsystem extends SubsystemBase {
     private int posIdx = 0;
     private double armSpeed = 0.2;
     private double armHold = .1;
-    private double spinSpeed = 0.5;
 
     SparkMax armMotor = new SparkMax(3, MotorType.kBrushless);
-    //SparkMax spinMotor = new SparkMax(4, MotorType.kBrushless);
     private final RelativeEncoder encoder;
 
     public ArmSubsystem() {
@@ -45,7 +43,7 @@ public class ArmSubsystem extends SubsystemBase {
         armMotor.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
     
-    // Stop the arm
+    // Command to stop the arm and hold at position
     public Command stopArm() {
         return Commands.run(() -> armMotor.stopMotor());
     }
@@ -54,29 +52,27 @@ public class ArmSubsystem extends SubsystemBase {
     public double getArmPosition() {
         return encoder.getPosition();
     }
-
-    // Command for arm to be still
-    public Command holdPos(){
-        return Commands.run(() -> armMotor.set(0),this);
-    }
     
-    // Command to move the arm up
+    // Command to move the arm up continuously
     public Command moveUp() {
         return Commands.run(() -> armMotor.set(armSpeed),this);
     }
     
-    // Command to move the arm down
+    // Command to move the arm down continuously
     public Command moveDown() {
         return Commands.run(() -> armMotor.set(-armSpeed),this);
     }
 
-    // Command to move the arm to a set position
+    // Command to move the arm to the bottom position
     public Command setArmDown() {
+        posIdx = 0;
         pid.setSetpoint(encoder.getPosition() - positions[posIdx]);
         return setArm();
     }
 
+    // Command to move the arm up one level
     public Command setArmUp() {
+        // Checks if next position is possible
         if (posIdx >= positions.length - 1){
             return null;
         }
@@ -88,6 +84,7 @@ public class ArmSubsystem extends SubsystemBase {
         
     }
 
+    // Moves the arm based on the setpoint
     public Command setArm() {
         return Commands.run(() -> {
             double velocity = pid.calculate(encoder.getPosition());
