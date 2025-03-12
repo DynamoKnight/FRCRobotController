@@ -29,6 +29,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.DumpRollerSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
+import frc.robot.subsystems.ArmSubsystem;
 
 public class RobotContainer {
     public double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 2; // kSpeedAt12Volts desired top speed
@@ -66,14 +67,20 @@ public class RobotContainer {
 
     public RobotContainer() {
         // Creates a Named Command, that can be accessed in path planner5
-        NamedCommands.registerCommand("Raise L4", setPosition(3).until(() -> Math.abs(39 - elevator.getPosition()) < 0.5));
-        NamedCommands.registerCommand("Score L4", dumpRoller.dropCoral(.2).withTimeout(.5));
-        NamedCommands.registerCommand("Wheel Stop",dumpRoller.keepCoral().withTimeout(.01));
-        NamedCommands.registerCommand("Raise L0", setPosition(0).until(() -> Math.abs(0.975 - elevator.getPosition()) < 0.5));
+        // Raises Elevator to Level 4
+        NamedCommands.registerCommand("Raise L4", setPosition(3).until(() -> Math.abs(positions[3] - elevator.getPosition()) < 0.5));
+        // Raises Elevator to Level 0
+        NamedCommands.registerCommand("Raise L0", setPosition(0).until(() -> Math.abs(positions[0] - elevator.getPosition()) < 0.5)); //0.975
+        // Outtakes Dump Roller on Reef
+        NamedCommands.registerCommand("Score", CoralOuttake());
+        // Stops the Dump Roller
+        NamedCommands.registerCommand("Wheel Stop", dumpRoller.keepCoral().withTimeout(.01));
+        // Aligns to the Left Reef side
         NamedCommands.registerCommand("Align Left", new AlignReef(this, ReefPos.LEFT).withTimeout(1.5));
+        // Aligns to the Right Reef side
         NamedCommands.registerCommand("Align Right", new AlignReef(this, ReefPos.RIGHT).withTimeout(1.5));
 
-        // Adds an auto
+        // Adds Autos to SmartDashboard
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
 
@@ -106,8 +113,6 @@ public class RobotContainer {
         }
          
     }
-
-
 
     // Moves the elevator to the position based on the list
     private Command setPosition(int pos){
@@ -170,7 +175,7 @@ public class RobotContainer {
         /////////////////////////////
         // OPERATOR CONTROL
         /////////////////////////////
-        // Toggle Elevator Positions
+        // TOGGLE ELEVATOR POSITIONS
         // Level 1
         joystick2.b().onTrue(setPosition(0));
         // Level 2
@@ -179,14 +184,23 @@ public class RobotContainer {
         joystick2.x().onTrue(setPosition(2));
         // Level 4
         joystick2.y().onTrue(setPosition(3));
-
-        // Toggle arm
+        // ARM CONTROLS
+        // Moves Arm Upwards
         joystick2.rightBumper().whileTrue(arm.moveUp());
+        // Moves Arm Downwards
         joystick2.leftBumper().whileTrue(arm.moveDown());
 
-        // Toggles arm wheels
+        // Spins Wheels Clockwise
         joystick2.povUp().whileTrue(wheel.clockwiseWheels());
+        // Spins Wheels Counter-Clockwise
         joystick2.povDown().whileTrue(wheel.counterClockwiseWheels());
+
+        /*// Toggles thtough open Arm positions
+        joystick2.povUp().whileTrue(arm.setArmUp());
+        // Sets the Arm position to closed
+        joystick2.povDown().whileTrue(arm.setArmDown());
+        // Spins the spin wheels
+        joystick2.leftTrigger().whileTrue(arm.spinWheels()).onFalse(arm.stopWheels());*/
 
     }
 
