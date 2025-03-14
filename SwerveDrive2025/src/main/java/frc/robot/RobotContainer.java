@@ -29,7 +29,6 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.DumpRollerSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
-import frc.robot.subsystems.ArmSubsystem;
 
 public class RobotContainer {
     public double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 2; // kSpeedAt12Volts desired top speed
@@ -59,7 +58,7 @@ public class RobotContainer {
     public final ArmWheelSubsystem wheel = new ArmWheelSubsystem();
 
      // Represents a list of the number of rotations to get to each level
-     Double[] positions = {0.95, 10.5, 21.5, 39.0};
+     Double[] positions = {1.25, 10.5, 21.5, 39.0};
      int pos = 0;
 
     /* Path follower */
@@ -68,11 +67,11 @@ public class RobotContainer {
     public RobotContainer() {
         // Creates a Named Command, that can be accessed in path planner5
         // Raises Elevator to Level 4
-        NamedCommands.registerCommand("Raise L4", setPosition(3).until(() -> Math.abs(positions[3] - elevator.getPosition()) < 0.5));
+        NamedCommands.registerCommand("Raise L4", setPositionwithThreshold(3));
         // Raises Elevator to Level 0
-        NamedCommands.registerCommand("Raise L0", setPosition(0).until(() -> Math.abs(positions[0] - elevator.getPosition()) < 0.5)); //0.975
+        NamedCommands.registerCommand("Raise L0", setPositionwithThreshold(0));
         // Outtakes Dump Roller on Reef
-        NamedCommands.registerCommand("Score", CoralOuttake());
+        NamedCommands.registerCommand("Score", dumpRoller.dropCoral(.2).withTimeout(.5));
         // Stops the Dump Roller
         NamedCommands.registerCommand("Stop Dump Roller", dumpRoller.keepCoral().withTimeout(.01));
         // Aligns to the Left Reef side
@@ -90,6 +89,8 @@ public class RobotContainer {
         dumpRoller.setDefaultCommand(dumpRoller.keepCoral());
         arm.setDefaultCommand(arm.stopArm());
         wheel.setDefaultCommand(wheel.stopWheels());
+
+        SmartDashboard.putNumber("Elevator Index", pos);
 
         // Configures the Bindings
         configureBindings();
@@ -121,6 +122,7 @@ public class RobotContainer {
         );
         joystick.pov(180).whileTrue(drivetrain.applyRequest(() ->
             forwardStraight.withVelocityX(-0.5).withVelocityY(0))
+        
         );
 
         // Run SysId routines when holding back/start and X/Y.
@@ -165,9 +167,9 @@ public class RobotContainer {
         // Moves Arm Downwards
         joystick2.leftBumper().whileTrue(arm.moveDown());
 
-        // Spins Wheels Clockwise
+        // Spins Wheels Clockwise, Left trigger safety button
         joystick2.povUp().whileTrue(wheel.clockwiseWheels());
-        // Spins Wheels Counter-Clockwise
+        // Spins Wheels Counter-Clockwise, Left trigger safety button
         joystick2.povDown().whileTrue(wheel.counterClockwiseWheels());
 
         /*// Toggles thtough open Arm positions
@@ -181,12 +183,14 @@ public class RobotContainer {
 
     // Outtakes Dump Roller Coral onto Reef
     private Command CoralOuttake(){
-        // Level 1 outake
+        // Starting Level outake
         if (pos == 0){
             // Sequence of Commands
             return Commands.sequence(
                 dumpRoller.dropCoral(.2).withTimeout(.5),
-                dumpRoller.keepCoral().withTimeout(.1)
+                dumpRoller.keepCoral().withTimeout(.1),
+                // Drops to Level 1 after done
+                setPosition(0).withTimeout(1.25)
             );
         }
         // Levels 2, 3, 4 outtake
@@ -199,6 +203,11 @@ public class RobotContainer {
             );
         }
          
+    }
+
+    // Moves the elevator to a set position with a threshold of 0.5
+    private Command setPositionwithThreshold(int targetPos){
+        return setPosition(targetPos).until(() -> Math.abs(positions[targetPos] - elevator.getPosition()) < 0.5);
     }
 
     // Moves the elevator to the position based on the list

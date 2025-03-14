@@ -7,25 +7,38 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Startline to Reef"
+            "pathName": "Top Startline to Reef"
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Align Left"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Align Left"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Raise L4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
           }
         },
         {
           "type": "sequential",
           "data": {
             "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Raise L4"
-                }
-              },
               {
                 "type": "named",
                 "data": {
@@ -54,7 +67,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Reef to Coral Stattion 1"
+                  "pathName": "Top Reef to Coral Station 1"
                 }
               }
             ]
@@ -69,25 +82,38 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Coral Station to Reef 1"
+            "pathName": "Top Coral Station to Reef 1"
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Align Left"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Align Left"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Raise L4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
           }
         },
         {
           "type": "sequential",
           "data": {
             "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Raise L4"
-                }
-              },
               {
                 "type": "named",
                 "data": {
@@ -116,7 +142,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Reef to Coral Station 2"
+                  "pathName": "Top Reef to Coral Station 2"
                 }
               }
             ]
@@ -131,13 +157,32 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Coral Station to Reef 2"
+            "pathName": "Top Coral Station to Reef 3"
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Align Right"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Align Right"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Raise L4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
           }
         },
         {
@@ -147,13 +192,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Raise L4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Score L4"
+                  "name": "Score"
                 }
               },
               {

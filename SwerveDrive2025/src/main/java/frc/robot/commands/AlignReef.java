@@ -54,7 +54,7 @@ public class AlignReef extends Command{
     // The tolerance for yaw alignment (radians)
     private final double yawTolerance = Math.PI / 32;
     // Indicates if alignment uses PID Control
-    private final boolean usingPID = true;
+    private final boolean usingPID = false;
 
     // Indicates the Left or Right side of reef
     ReefPos reefPos;

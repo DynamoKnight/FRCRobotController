@@ -45,7 +45,7 @@ public class ArmSubsystem extends SubsystemBase {
     
     // Command to stop the arm and hold at position
     public Command stopArm() {
-        return Commands.run(() -> armMotor.stopMotor());
+        return Commands.run(() -> armMotor.set(0),this);
     }
 
     // Get the current position of the arm
