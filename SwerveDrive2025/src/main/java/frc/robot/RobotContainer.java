@@ -31,7 +31,7 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 
 public class RobotContainer {
-    public double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 2; // kSpeedAt12Volts desired top speed
+    public double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.7; //  kSpeedAt12Volts desired top speed
     public double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
@@ -58,7 +58,7 @@ public class RobotContainer {
     public final ArmWheelSubsystem wheel = new ArmWheelSubsystem();
 
      // Represents a list of the number of rotations to get to each level
-     Double[] positions = {1.25, 10.5, 21.5, 39.0};
+     Double[] positions = {1.25, 10.5, 21.5, 38.75};
      int pos = 0;
 
     /* Path follower */
@@ -187,7 +187,7 @@ public class RobotContainer {
         if (pos == 0){
             // Sequence of Commands
             return Commands.sequence(
-                dumpRoller.dropCoral(.2).withTimeout(.5),
+                dumpRoller.dropCoral(.15).withTimeout(.5),
                 dumpRoller.keepCoral().withTimeout(.1),
                 // Drops to Level 1 after done
                 setPosition(0).withTimeout(1.25)
@@ -196,7 +196,7 @@ public class RobotContainer {
         // Levels 2, 3, 4 outtake
         else{
             return Commands.sequence(
-                dumpRoller.dropCoral(.2).withTimeout(.5),
+                dumpRoller.dropCoral(.15).withTimeout(.5),
                 dumpRoller.keepCoral().withTimeout(.1),
                 // Drops to Level 1 after done
                 setPosition(0).withTimeout(1.25)
@@ -226,7 +226,7 @@ public class RobotContainer {
     }
 
     public Command decreaseSpeed(){
-        return Commands.run(() -> MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 2);
+        return Commands.run(() -> MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.7);
     }
 
     public void setSpeed(double speed){

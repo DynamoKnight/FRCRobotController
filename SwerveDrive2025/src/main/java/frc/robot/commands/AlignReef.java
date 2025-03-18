@@ -290,12 +290,18 @@ public class AlignReef extends Command{
         // Without PID, it will check until the tolerance is reached
         if (!usingPID){
             Pose2d currentPose = drivetrain.getState().Pose;
-            double distance = targetPose.getTranslation().getDistance(currentPose.getTranslation());
-            // This gets the yaw error from the target
-            double yawError = MathUtil.angleModulus(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
+            if (currentPose != null && targetPose != null){
+                double distance = targetPose.getTranslation().getDistance(currentPose.getTranslation());
+                // This gets the yaw error from the target
+                double yawError = MathUtil.angleModulus(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
 
-            // Ends once robot is within tolerance
-            return distance <= positionTolerance && Math.abs(yawError) <= yawTolerance;
+                // Ends once robot is within tolerance
+                return distance <= positionTolerance && Math.abs(yawError) <= yawTolerance;
+            }
+            else{
+                return super.isFinished();
+            }
+            
         }
         // PID will have its own tolerance check, so isFinished is unnecessary
         else{
@@ -308,7 +314,7 @@ public class AlignReef extends Command{
     public void end(boolean interrupted){
         // Ensures drivetrain stop
         drivetrain.setControl(stop);
-        robotContainer.MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) / 2;
+        robotContainer.MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.7;
         if (interrupted) {
             System.out.println("AlignReef interrupted.");
         } 
