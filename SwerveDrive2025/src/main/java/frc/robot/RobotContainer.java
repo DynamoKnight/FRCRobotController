@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.ReefPos;
 import frc.robot.commands.AlignReef;
+import frc.robot.commands.IntakeCoral;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ArmWheelSubsystem;
@@ -57,19 +58,15 @@ public class RobotContainer {
     public final ArmSubsystem arm = new ArmSubsystem();
     public final ArmWheelSubsystem wheel = new ArmWheelSubsystem();
 
-     // Represents a list of the number of rotations to get to each level
-     Double[] positions = {1.25, 10.5, 21.5, 38.75};
-     int pos = 0;
-
     /* Path follower */
     private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
         // Creates a Named Command, that can be accessed in path planner5
         // Raises Elevator to Level 4
-        NamedCommands.registerCommand("Raise L4", setPositionwithThreshold(3));
+        NamedCommands.registerCommand("Raise L4", elevator.setPositionwithThreshold(3));
         // Raises Elevator to Level 0
-        NamedCommands.registerCommand("Raise L0", setPositionwithThreshold(0));
+        NamedCommands.registerCommand("Raise L0", elevator.setPositionwithThreshold(0));
         // Outtakes Dump Roller on Reef
         NamedCommands.registerCommand("Score", dumpRoller.dropCoral(.2).withTimeout(.5));
         // Stops the Dump Roller
@@ -78,6 +75,9 @@ public class RobotContainer {
         NamedCommands.registerCommand("Align Left", new AlignReef(this, ReefPos.LEFT).withTimeout(1.5));
         // Aligns to the Right Reef side
         NamedCommands.registerCommand("Align Right", new AlignReef(this, ReefPos.RIGHT).withTimeout(1.5));
+
+        NamedCommands.registerCommand("Intake Coral", new IntakeCoral(this).withTimeout(5));
+        
 
         // Adds Autos to SmartDashboard
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
@@ -89,8 +89,6 @@ public class RobotContainer {
         dumpRoller.setDefaultCommand(dumpRoller.keepCoral());
         arm.setDefaultCommand(arm.stopArm());
         wheel.setDefaultCommand(wheel.stopWheels());
-
-        SmartDashboard.putNumber("Elevator Index", pos);
 
         // Configures the Bindings
         configureBindings();
@@ -154,13 +152,13 @@ public class RobotContainer {
         /////////////////////////////
         // TOGGLE ELEVATOR POSITIONS
         // Level 1
-        joystick2.b().onTrue(setPosition(0));
+        joystick2.b().onTrue(elevator.setPosition(0));
         // Level 2
-        joystick2.a().onTrue(setPosition(1));
+        joystick2.a().onTrue(elevator.setPosition(1));
         // Level 3
-        joystick2.x().onTrue(setPosition(2));
+        joystick2.x().onTrue(elevator.setPosition(2));
         // Level 4
-        joystick2.y().onTrue(setPosition(3));
+        joystick2.y().onTrue(elevator.setPosition(3));
         // ARM CONTROLS
         // Moves Arm Upwards
         joystick2.rightBumper().whileTrue(arm.moveUp());
@@ -172,10 +170,23 @@ public class RobotContainer {
         // Spins Wheels Counter-Clockwise, Left trigger safety button
         joystick2.povDown().whileTrue(wheel.counterClockwiseWheels());
 
-        /*// Toggles thtough open Arm positions
-        joystick2.povUp().whileTrue(arm.setArmUp());
+        /*// Sticks coral out to make it easier to target
+        joystick2.povLeft().onTrue(dumpRoller.PrepareCoral(true));
+        // Takes coral back in incase it is falling out
+        joystick2.povRight().onTrue(dumpRoller.PrepareCoral(false));*/
+
+        // Sticks coral out when holding Left Dpad
+        joystick2.povLeft().whileTrue(dumpRoller.dropCoral(0.1)).onFalse(dumpRoller.keepCoral().withTimeout(0.1));
+        // Sticks coral in when holding Right Dpad
+        joystick2.povRight().whileTrue(dumpRoller.dropCoral(-0.1)).onFalse(dumpRoller.keepCoral().withTimeout(0.1));
+
+        // Continually outtakes coral on Left Trigger
+        joystick2.leftTrigger().onTrue(new IntakeCoral(this));
+
+        /*// Toggles through open Arm positions
+        joystick2.povUp().onTrue(arm.setArmUp());
         // Sets the Arm position to closed
-        joystick2.povDown().whileTrue(arm.setArmDown());
+        joystick2.povDown().onTrue(arm.setArmDown());
         // Spins the spin wheels
         joystick2.leftTrigger().whileTrue(arm.spinWheels()).onFalse(arm.stopWheels());*/
 
@@ -183,37 +194,19 @@ public class RobotContainer {
 
     // Outtakes Dump Roller Coral onto Reef
     private Command CoralOuttake(){
-        // Starting Level outake
-        if (pos == 0){
-            // Sequence of Commands
-            return Commands.sequence(
-                dumpRoller.dropCoral(.15).withTimeout(.5),
-                dumpRoller.keepCoral().withTimeout(.1),
-                // Drops to Level 1 after done
-                setPosition(0).withTimeout(1.25)
-            );
-        }
-        // Levels 2, 3, 4 outtake
-        else{
-            return Commands.sequence(
-                dumpRoller.dropCoral(.15).withTimeout(.5),
-                dumpRoller.keepCoral().withTimeout(.1),
-                // Drops to Level 1 after done
-                setPosition(0).withTimeout(1.25)
-            );
-        }
+        // List of speeds for each elevator level
+        // TEMPORARY VALUES
+        double[] launchSpeeds = {0.15, 0.2, 0.25, 0.30};
+        double speedToUse = launchSpeeds[elevator.pos];
+        System.out.println(elevator.pos);
+        // Sequence of Commands
+        return Commands.sequence(
+            dumpRoller.dropCoral(.2).withTimeout(.5),
+            dumpRoller.keepCoral().withTimeout(.1),
+            // Drops to Level 1 after done
+            elevator.setPosition(0).withTimeout(1.25)
+        );
          
-    }
-
-    // Moves the elevator to a set position with a threshold of 0.5
-    private Command setPositionwithThreshold(int targetPos){
-        return setPosition(targetPos).until(() -> Math.abs(positions[targetPos] - elevator.getPosition()) < 0.5);
-    }
-
-    // Moves the elevator to the position based on the list
-    private Command setPosition(int pos){
-        this.pos = pos;
-        return elevator.setCloseLoop(() -> positions[pos]);
     }
 
     public Command getAutonomousCommand() {

@@ -33,13 +33,14 @@ public class AlignReef extends Command{
     Timer timer = new Timer();
 
     /* ----- PIDs ----- */
-    private PIDController pidX = new PIDController(1, 0, 0);
-    private PIDController pidY = new PIDController(1, 0, 0);
-    private PIDController pidRotate = new PIDController(1, 0, 0);
+    // 6,6,3
+    private PIDController pidX = new PIDController(6, 0, 0);
+    private PIDController pidY = new PIDController(6, 0, 0);
+    private PIDController pidRotate = new PIDController(3, 0, 0); 
 
     // Creates a swerve request that specifies the robot to move FieldCentric
     private final SwerveRequest.FieldCentric driveRequest = new SwerveRequest.FieldCentric()
-    .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+    .withDriveRequestType(DriveRequestType.Velocity); // Uses ClosedLoopVoltage for PID
     // Creates a swerve request to stop all motion by setting velocities and rotational rate to 0
     SwerveRequest stop = driveRequest.withVelocityX(0).withVelocityY(0).withRotationalRate(0);
 
@@ -54,7 +55,7 @@ public class AlignReef extends Command{
     // The tolerance for yaw alignment (radians)
     private final double yawTolerance = Math.PI / 32;
     // Indicates if alignment uses PID Control
-    private final boolean usingPID = false;
+    private final boolean usingPID = true;
 
     // Indicates the Left or Right side of reef
     ReefPos reefPos;
@@ -113,13 +114,13 @@ public class AlignReef extends Command{
         // Reef Offset Positions - log the chosen offsets
         if (Constants.contains(new double[]{6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22}, tID)){
             if (reefPos == ReefPos.LEFT){
-                System.out.println("left");
-                offsetX = -0.4524;
+                //System.out.println("left");
+                offsetX = -0.41;
                 offsetY = 0.13;
             }
             else if (reefPos == ReefPos.RIGHT){
-                System.out.println("right");
-                offsetX = -0.4524;
+                //System.out.println("right");
+                offsetX = -0.41;
                 offsetY = -0.23;
             }
             Logger.recordOutput("Reefscape/AlignReef/OffsetX", offsetX);
@@ -148,7 +149,7 @@ public class AlignReef extends Command{
         // Converts to radians
         pidRotate.setSetpoint(targetPose.getRotation().getRadians());
         // Prints Target Pose
-        System.out.println("Target Pose2d: " + targetPose.getX() + ", " + targetPose.getY() + ", " + targetPose.getRotation().getDegrees());
+        //System.out.println("Target Pose2d: " + targetPose.getX() + ", " + targetPose.getY() + ", " + targetPose.getRotation().getDegrees());
     }
 
     // Called every 20ms to perform actions of Command

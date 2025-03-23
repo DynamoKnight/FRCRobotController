@@ -69,6 +69,12 @@
                 "data": {
                   "pathName": "Reef to Coral Stattion 1"
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake Coral"
+                }
               }
             ]
           }
@@ -143,6 +149,12 @@
                 "type": "path",
                 "data": {
                   "pathName": "Reef to Coral Station 2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake Coral"
                 }
               }
             ]

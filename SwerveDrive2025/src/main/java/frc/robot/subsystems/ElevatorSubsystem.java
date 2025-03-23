@@ -22,6 +22,10 @@
         // Defines a static voltage for the elevator
         private final VoltageOut voltageOut = new VoltageOut(0);
 
+        // Represents a list of the number of rotations to get to each level
+        public Double[] positions = {1.25, 10.5, 21.5, 39.5};
+        public int pos = 0;
+
         // Initializes the motors and controller
         public ElevatorSubsystem() {
             // Back Elevator follows front elevator
@@ -45,8 +49,8 @@
             // Reaction to change in error, lessens overshooting
             config.Slot0.kD = 0;   
             // Feedforward
-            config.Slot0.kG = 0.4;        
-            config.Slot0.kS = 0.4;
+            config.Slot0.kG = 0.45;        
+            config.Slot0.kS = 0.45;
             config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
             // Motion Magic
             config.MotionMagic.MotionMagicCruiseVelocity = 100;
@@ -83,14 +87,26 @@
             SmartDashboard.putNumber("elevator applied", frontElevator.getMotorVoltage().getValueAsDouble());
         }
 
+        // Moves the elevator to a set position with a threshold of 0.5
+        public Command setPositionwithThreshold(int targetPos){
+            return setPosition(targetPos).until(() -> Math.abs(positions[targetPos] - getPosition()) < 0.5);
+        }
+
+        // Moves the elevator to the position based on the list
+        public Command setPosition(int targetPos){
+            pos = targetPos;
+            SmartDashboard.putNumber("Elevator Level Index", pos);
+            return setCloseLoop(() -> positions[targetPos]);
+        }
+
         /** Sets the position of both motors.
          * @param rotations is the number of rotations it will hold at.
          */
-        public void setPositions(double rotations){
+        public void setRotation(double rotations){
             frontElevator.setPosition(rotations);
         }
 
-        public void reset() {
+        public void resetRotation() {
             frontElevator.setPosition(0);
         }
 
