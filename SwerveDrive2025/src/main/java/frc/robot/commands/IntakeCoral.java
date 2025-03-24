@@ -16,12 +16,12 @@ public class IntakeCoral extends Command{
     DumpRollerSubsystem dumpRoller;
 
     // Buffer to store the last few current readings
-    private static final int BUFFER_SIZE = 5;
+    private static final int BUFFER_SIZE = 15;
     private Queue<Double> currentBuffer = new LinkedList<>();
 
     // Current threshold values
-    private static final double HIGH_CURRENT_THRESHOLD = 20.0;  // Coral is engaged
-    private static final int HIGH_CURRENT_COUNT = 3; // Number of readings needed above threshold
+    private static final double HIGH_CURRENT_THRESHOLD = 22;  // Coral is engaged
+    private static final int HIGH_CURRENT_COUNT = 4; // Number of readings needed above threshold
 
 
     // CONSTRUCTOR

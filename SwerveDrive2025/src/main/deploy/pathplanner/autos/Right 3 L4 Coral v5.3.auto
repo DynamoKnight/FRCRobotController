@@ -69,20 +69,14 @@
                 "data": {
                   "pathName": "Reef to Coral Stattion 1"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake Coral"
-                }
               }
             ]
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 1.0
+            "name": "Intake Coral"
           }
         },
         {
@@ -150,20 +144,14 @@
                 "data": {
                   "pathName": "Reef to Coral Station 2"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake Coral"
-                }
               }
             ]
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 1.0
+            "name": "Intake Coral"
           }
         },
         {

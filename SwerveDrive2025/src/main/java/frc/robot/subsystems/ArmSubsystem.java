@@ -22,7 +22,6 @@ public class ArmSubsystem extends SubsystemBase {
     private double[] positions = new double[]{0, 10, 15};
     private int posIdx = 0;
     private double armSpeed = 0.2;
-    private double armHold = .1;
 
     SparkMax armMotor = new SparkMax(3, MotorType.kBrushless);
     private final RelativeEncoder encoder;

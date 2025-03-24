@@ -23,7 +23,7 @@
         private final VoltageOut voltageOut = new VoltageOut(0);
 
         // Represents a list of the number of rotations to get to each level
-        public Double[] positions = {1.25, 10.5, 21.5, 39.5};
+        public Double[] positions = {1.25, 11.0, 22.0, 39.0};
         public int pos = 0;
 
         // Initializes the motors and controller

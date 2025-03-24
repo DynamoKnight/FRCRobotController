@@ -17,7 +17,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Align Left"
+                  "name": "Align Right"
                 }
               },
               {
@@ -74,9 +74,9 @@
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 1.0
+            "name": "Intake Coral"
           }
         },
         {
@@ -149,9 +149,9 @@
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 1.0
+            "name": "Intake Coral"
           }
         },
         {

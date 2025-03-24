@@ -72,9 +72,9 @@ public class RobotContainer {
         // Stops the Dump Roller
         NamedCommands.registerCommand("Stop Dump Roller", dumpRoller.keepCoral().withTimeout(.01));
         // Aligns to the Left Reef side
-        NamedCommands.registerCommand("Align Left", new AlignReef(this, ReefPos.LEFT).withTimeout(1.5));
+        NamedCommands.registerCommand("Align Left", new AlignReef(this, ReefPos.LEFT).withTimeout(1.0));
         // Aligns to the Right Reef side
-        NamedCommands.registerCommand("Align Right", new AlignReef(this, ReefPos.RIGHT).withTimeout(1.5));
+        NamedCommands.registerCommand("Align Right", new AlignReef(this, ReefPos.RIGHT).withTimeout(1.0));
 
         NamedCommands.registerCommand("Intake Coral", new IntakeCoral(this).withTimeout(5));
         
@@ -141,8 +141,7 @@ public class RobotContainer {
         joystick.leftBumper().whileTrue(new AlignReef(this, Constants.ReefPos.LEFT));
 
         // Overdrive button for speed
-        joystick.b().toggleOnTrue(increaseSpeed());
-        joystick.a().toggleOnTrue(decreaseSpeed());
+        joystick.b().whileTrue(increaseSpeed()).onFalse(decreaseSpeed());
 
         // Outtakes coral 
         joystick.rightTrigger().onTrue(CoralOuttake());
@@ -176,9 +175,9 @@ public class RobotContainer {
         joystick2.povRight().onTrue(dumpRoller.PrepareCoral(false));*/
 
         // Sticks coral out when holding Left Dpad
-        joystick2.povLeft().whileTrue(dumpRoller.dropCoral(0.1)).onFalse(dumpRoller.keepCoral().withTimeout(0.1));
+        joystick2.povLeft().whileTrue(dumpRoller.dropCoral(0.15)).onFalse(dumpRoller.keepCoral().withTimeout(0.1));
         // Sticks coral in when holding Right Dpad
-        joystick2.povRight().whileTrue(dumpRoller.dropCoral(-0.1)).onFalse(dumpRoller.keepCoral().withTimeout(0.1));
+        joystick2.povRight().whileTrue(dumpRoller.dropCoral(-0.15)).onFalse(dumpRoller.keepCoral().withTimeout(0.1));
 
         // Continually outtakes coral on Left Trigger
         joystick2.leftTrigger().onTrue(new IntakeCoral(this));
@@ -199,12 +198,13 @@ public class RobotContainer {
         double[] launchSpeeds = {0.15, 0.2, 0.25, 0.30};
         double speedToUse = launchSpeeds[elevator.pos];
         System.out.println(elevator.pos);
+
         // Sequence of Commands
         return Commands.sequence(
-            dumpRoller.dropCoral(.2).withTimeout(.5),
-            dumpRoller.keepCoral().withTimeout(.1),
+            dumpRoller.dropCoral(.25).withTimeout(0.5),
+            dumpRoller.keepCoral().withTimeout(0.1),
             // Drops to Level 1 after done
-            elevator.setPosition(0).withTimeout(1.25)
+            elevator.setPosition(0)
         );
          
     }
