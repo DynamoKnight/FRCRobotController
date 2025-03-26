@@ -1,5 +1,6 @@
     package frc.robot.subsystems;
 
+    import edu.wpi.first.wpilibj.DigitalInput;
     import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -13,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
         
         // Initializes the motor
         public SparkMax coralMotor = new SparkMax(2, MotorType.kBrushless);
+        private DigitalInput coralSensor;
         public Timer a_timer = new Timer();
         // Indicates if the launcher is in action
         public Boolean isRunning = false;
@@ -26,7 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
         // Initializes the motors and controller
         public DumpRollerSubsystem() {
-            
+            coralSensor = new DigitalInput(9);
         }
 
         // Outtakes the coral
@@ -38,6 +40,11 @@ import edu.wpi.first.wpilibj2.command.Command;
         public Command keepCoral(){
             return Commands.run(() -> coralMotor.set(0), this);
         }
+
+        // Returns the sensor input, If a coral was found
+        public boolean getSensorInput() {
+            return coralSensor.get();
+          }
 
         // Controls the position of the coral
         public Command PrepareCoral(boolean out){
@@ -60,7 +67,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
         @Override
         public void periodic() {
-            SmartDashboard.putNumber("Coral Motor Voltage", coralMotor.getAppliedOutput());
             SmartDashboard.putNumber("Coral Motor Current", coralMotor.getOutputCurrent());
+            SmartDashboard.putBoolean("Intake Sensor", coralSensor.get());
         }
     }

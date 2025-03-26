@@ -14,6 +14,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -47,8 +48,8 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     // Joysticks
-    private final CommandXboxController joystick = new CommandXboxController(0);
-    private final CommandXboxController joystick2 = new CommandXboxController(1);
+    public final CommandXboxController joystick = new CommandXboxController(0);
+    public final CommandXboxController joystick2 = new CommandXboxController(1);
 
     // Subsystems
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
@@ -75,8 +76,8 @@ public class RobotContainer {
         NamedCommands.registerCommand("Align Left", new AlignReef(this, ReefPos.LEFT).withTimeout(1.0));
         // Aligns to the Right Reef side
         NamedCommands.registerCommand("Align Right", new AlignReef(this, ReefPos.RIGHT).withTimeout(1.0));
-
-        NamedCommands.registerCommand("Intake Coral", new IntakeCoral(this).withTimeout(5));
+        // Runs the Dump Roller until coral is detected
+        NamedCommands.registerCommand("Intake Coral", new IntakeCoral(this));
         
 
         // Adds Autos to SmartDashboard
@@ -136,19 +137,21 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
 
         // Aligns to the reef april tag, right side
-        joystick.rightBumper().whileTrue(new AlignReef(this, Constants.ReefPos.RIGHT));
+        joystick.rightBumper().whileTrue(new AlignReef(this, Constants.ReefPos.RIGHT)).onFalse(Commands.startEnd(() -> joystick2.setRumble(RumbleType.kBothRumble, 0.7), () -> joystick2.setRumble(RumbleType.kBothRumble, 0)).withTimeout(0.25));
         // Aligns to the reef april tag, left side
-        joystick.leftBumper().whileTrue(new AlignReef(this, Constants.ReefPos.LEFT));
+        joystick.leftBumper().whileTrue(new AlignReef(this, Constants.ReefPos.LEFT)).onFalse(Commands.startEnd(() -> joystick2.setRumble(RumbleType.kBothRumble, 0.7), () -> joystick2.setRumble(RumbleType.kBothRumble, 0)).withTimeout(0.25));;
 
         // Overdrive button for speed
         joystick.b().whileTrue(increaseSpeed()).onFalse(decreaseSpeed());
 
         // Outtakes coral 
         joystick.rightTrigger().onTrue(CoralOuttake());
+        
 
         /////////////////////////////
         // OPERATOR CONTROL
         /////////////////////////////
+        joystick2.setRumble(RumbleType.kBothRumble, 0);
         // TOGGLE ELEVATOR POSITIONS
         // Level 1
         joystick2.b().onTrue(elevator.setPosition(0));
@@ -179,15 +182,8 @@ public class RobotContainer {
         // Sticks coral in when holding Right Dpad
         joystick2.povRight().whileTrue(dumpRoller.dropCoral(-0.15)).onFalse(dumpRoller.keepCoral().withTimeout(0.1));
 
-        // Continually outtakes coral on Left Trigger
+        // Continually runs Dump Roller on Left Trigger until coral detected
         joystick2.leftTrigger().onTrue(new IntakeCoral(this));
-
-        /*// Toggles through open Arm positions
-        joystick2.povUp().onTrue(arm.setArmUp());
-        // Sets the Arm position to closed
-        joystick2.povDown().onTrue(arm.setArmDown());
-        // Spins the spin wheels
-        joystick2.leftTrigger().whileTrue(arm.spinWheels()).onFalse(arm.stopWheels());*/
 
     }
 
@@ -202,7 +198,7 @@ public class RobotContainer {
         // Sequence of Commands
         return Commands.sequence(
             dumpRoller.dropCoral(.25).withTimeout(0.5),
-            dumpRoller.keepCoral().withTimeout(0.1),
+            dumpRoller.keepCoral().withTimeout(0.01),
             // Drops to Level 1 after done
             elevator.setPosition(0)
         );

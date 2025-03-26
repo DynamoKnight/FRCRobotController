@@ -10,7 +10,6 @@
     import com.ctre.phoenix6.hardware.*;
     import com.ctre.phoenix6.signals.GravityTypeValue;
     import com.ctre.phoenix6.signals.InvertedValue;
-    //import com.ctre.phoenix6.motorcontrol.ControlMode;
     import com.ctre.phoenix6.signals.NeutralModeValue;
 
     public class ElevatorSubsystem extends SubsystemBase{
