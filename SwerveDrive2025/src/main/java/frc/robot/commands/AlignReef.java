@@ -165,6 +165,8 @@ public class AlignReef extends Command{
         xController.setSetpoint(targetPose.getX());
         yController.setSetpoint(targetPose.getY());
         thetaController.setGoal(targetPose.getRotation().getRadians());
+
+        robotContainer.MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.3;
     }
 
     // Called every 20ms to perform actions of Command
@@ -180,7 +182,6 @@ public class AlignReef extends Command{
         Pose2d currentPose = drivetrain.getState().Pose;
         Logger.recordOutput("Reefscape/AlignReef/CurrentPose", currentPose);
         Logger.recordOutput("Reefscape/AlignReef/ExecuteTime", timer.get());
-        
         // Calculate distance to target for speed scaling
         double distance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
         Logger.recordOutput("Reefscape/AlignReef/Distance", distance);
@@ -234,21 +235,7 @@ public class AlignReef extends Command{
         // If a tag wasn't detected, command will end
         if (!tagDetected) {
             return true;
-        }
-        
-        // Check if we've reached the target position and orientation
-        Pose2d currentPose = drivetrain.getState().Pose;
-        if (currentPose != null && targetPose != null) {
-            double distance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
-            double yawError = MathUtil.angleModulus(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
-            
-            // End command if we're within tolerance
-            if (distance <= positionTolerance && Math.abs(yawError) <= yawTolerance) {
-                Logger.recordOutput("Reefscape/AlignReef/TargetReached", true);
-                return true;
-            }
-        }
-        
+        }        
         return super.isFinished();
     }
 
