@@ -10,15 +10,10 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -38,12 +33,10 @@ public class AlignReef extends Command{
     Timer timer = new Timer();
 
     /* ----- PIDs ----- */
-    private final PIDController xController = new PIDController(6, 0, 0);
-    private final PIDController yController = new PIDController(6, 0, 0);
-    // Uses trapezoidal motion for smoother movement
-    private final ProfiledPIDController thetaController = new ProfiledPIDController(3, 0, 0, new TrapezoidProfile.Constraints(Math.PI, Math.PI)); // I set the max velocity to PI rad/s (It can rotate 180 deg in 1 sec)
-    
-    private final HolonomicDriveController controller;
+    // 6,6,3
+    private PIDController pidX = new PIDController(6, 0, 0);
+    private PIDController pidY = new PIDController(6, 0, 0);
+    private PIDController pidRotate = new PIDController(3, 0, 0); 
 
     // Creates a swerve request that specifies the robot to move FieldCentric
     private final SwerveRequest.FieldCentric driveRequest = new SwerveRequest.FieldCentric()
@@ -54,17 +47,15 @@ public class AlignReef extends Command{
     // The Desired position to go to
     private Pose2d targetPose;
     // The speed to move to position
-    private final double speed = 0.1;
-    
-    // Speed scaling parameters
-    // The minimum speed factor (percentage of max speed)
-    private final double minSpeedFactor = 0.0000001;
-    // Scaling factor - higher values = faster slowdown as distance decreases
-    private final double distanceScalingFactor = 12.0; 
+    private final double speed = 1.0;
+    // The speed (rad/s) to rotate to position
+    private final double rotationSpeed = 0.75;
     // The tolerance before stopping align (meters)
     private final double positionTolerance = 0.01;
     // The tolerance for yaw alignment (radians)
     private final double yawTolerance = Math.PI / 32;
+    // Indicates if alignment uses PID Control
+    private final boolean usingPID = true;
 
     // Indicates the Left or Right side of reef
     ReefPos reefPos;
@@ -84,19 +75,10 @@ public class AlignReef extends Command{
         this.drivetrain = robotContainer.drivetrain;
         this.limelight = robotContainer.limelight;
         this.reefPos = reefPos;
-        
-        thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        
-        // Create holonomic controller
-        controller = new HolonomicDriveController(
-            xController,
-            yController,
-            thetaController
-        );
-        
-        // drivetrain is required for this command
-        addRequirements(drivetrain);
-        
+
+        // -180 and 180 degrees are the same point, so its continuous
+        pidRotate.enableContinuousInput(-Math.PI, Math.PI);
+
         // Added Logging
         System.out.println("AlignReef command created for " + reefPos + " position");
         Logger.recordOutput("Reefscape/AlignReef/ReefPosition", reefPos.toString());
@@ -162,86 +144,178 @@ public class AlignReef extends Command{
         Logger.recordOutput("Reefscape/AlignReef/TargetPose", targetPose);
 
         // Sets the destination to go to for the PID
-        xController.setSetpoint(targetPose.getX());
-        yController.setSetpoint(targetPose.getY());
-        thetaController.setGoal(targetPose.getRotation().getRadians());
+        pidX.setSetpoint(targetPose.getX());
+        pidY.setSetpoint(targetPose.getY());
+        // Converts to radians
+        pidRotate.setSetpoint(targetPose.getRotation().getRadians());
+        // Prints Target Pose
+        //System.out.println("Target Pose2d: " + targetPose.getX() + ", " + targetPose.getY() + ", " + targetPose.getRotation().getDegrees());
 
-        robotContainer.MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.3;
+        // Sets Robot Max Speed for Alignment
+        robotContainer.MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.7;
     }
 
     // Called every 20ms to perform actions of Command
     @Override
-    public void execute() {
-        // If no tag was detected, then Command won't execute
-        if (!tagDetected) {
+    public void execute(){
+        // If no tag was detected, then Command wont execute
+        if (!tagDetected){
             Logger.recordOutput("Reefscape/AlignReef/ExecuteSkipped", true);
             return;
         }
-        
         // Gets current robot Pose2d
         Pose2d currentPose = drivetrain.getState().Pose;
         Logger.recordOutput("Reefscape/AlignReef/CurrentPose", currentPose);
         Logger.recordOutput("Reefscape/AlignReef/ExecuteTime", timer.get());
-        // Calculate distance to target for speed scaling
-        double distance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
-        Logger.recordOutput("Reefscape/AlignReef/Distance", distance);
+        // Gets rotational error
+        double yawError = MathUtil.angleModulus(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
+        Logger.recordOutput("Reefscape/AlignReef/YawError", yawError);
         
-        /*double speedFactor = 1.0 / (1.0 + (distanceScalingFactor * distance));
-        speedFactor = 1.0 - speedFactor;*/
-        double slowdownStartDistance = 3.0;
-        double speedFactor = Math.min(1.0, distance / slowdownStartDistance);
+        // List of X, Y, Yaw velocities to go to target pose
+        double[] velocities;
         
-        // Ensure we don't go below minimum speed
-        speedFactor = Math.max(minSpeedFactor, speedFactor);
-        double scaledSpeed = speed * speedFactor;
-        
-        Logger.recordOutput("Reefscape/AlignReef/SpeedFactor", speedFactor);
-        Logger.recordOutput("Reefscape/AlignReef/ScaledSpeed", scaledSpeed);
-        
-        // Calculates the chassis speeds required to move the robot to the target pose
-        ChassisSpeeds speeds = controller.calculate(
-            currentPose,
-            targetPose,
-            scaledSpeed, // Use scaled speed based on distance
-            targetPose.getRotation()
-        );
-        
-        // Direction flipping for red side
-        boolean isFlippingDirection = Constants.contains(new double[]{6, 7, 8, 9, 10, 11}, tID);
-        Logger.recordOutput("Reefscape/AlignReef/FlippedDirection", isFlippingDirection);
-        
-        if (isFlippingDirection) {
-            drivetrain.setControl(driveRequest
-                .withVelocityX(-speeds.vxMetersPerSecond)
-                .withVelocityY(-speeds.vyMetersPerSecond)
-                .withRotationalRate(speeds.omegaRadiansPerSecond));
-        } else {
-            drivetrain.setControl(driveRequest
-                .withVelocityX(speeds.vxMetersPerSecond)
-                .withVelocityY(speeds.vyMetersPerSecond)
-                .withRotationalRate(speeds.omegaRadiansPerSecond));
+        // PID Alignment
+        if (usingPID){
+            // Calculates required velocities, rotates before moving
+            velocities = calculateErrorPID(currentPose, true);
+        }
+        // Regular Alignment
+        else{ 
+            // Calculates required velocities, rotates before moving           
+            velocities = calculateError(currentPose, true);
         }
         
-        // Log velocities and errors
-        Logger.recordOutput("Reefscape/AlignReef/Velocities", new double[]{speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond});
-        Logger.recordOutput("Reefscape/Limelight/x error", xController.getPositionError());
-        Logger.recordOutput("Reefscape/Limelight/y error", yController.getPositionError());
-        Logger.recordOutput("Reefscape/AlignReef/RotationalError", thetaController.getPositionError());
+        // Logs values
+        SmartDashboard.putNumberArray("Target Pose", new double[]{targetPose.getX(), targetPose.getY(), targetPose.getRotation().getDegrees()});
+        SmartDashboard.putNumberArray("Current Pose", new double[]{currentPose.getX(), currentPose.getY(), currentPose.getRotation().getDegrees()});
+        SmartDashboard.putNumberArray("Target Vector", new double[]{velocities[0], velocities[1], velocities[2]});
+        Logger.recordOutput("Reefscape/AlignReef/Velocities", velocities);
+
+        // The direction flips for the red side
+        boolean isFlippingDirection = Constants.contains(new double[]{6, 7, 8, 9, 10, 11}, tID);
+        Logger.recordOutput("Reefscape/AlignReef/FlippedDirection", isFlippingDirection);
+
+        // Moves the drivetrain
+        if (isFlippingDirection){
+            drivetrain.setControl(driveRequest.withVelocityX(-velocities[0]).withVelocityY(-velocities[1]).withRotationalRate(velocities[2]));
+        }
+        else{
+            drivetrain.setControl(driveRequest.withVelocityX(velocities[0]).withVelocityY(velocities[1]).withRotationalRate(velocities[2]));
+        }
+
+    }
+
+    // Calculates the needed velocities to get to the target pose
+    public double[] calculateError(Pose2d currentPose, boolean rotateFirst){
+         // Finds the translation difference (X2-X1, Y2-Y1) between the current and target pose
+         Translation2d error = targetPose.getTranslation().minus(currentPose.getTranslation());
+         // Finds the hypotenuse distance to the desired point
+         double distance = error.getNorm();
+         Logger.recordOutput("Reefscape/AlignReef/TranslationError", new double[]{error.getX(), error.getY()});
+         Logger.recordOutput("Reefscape/AlignReef/Distance", distance);
+         // This gets the robots current rotation (rad)
+         // AngleModulus normalizes the difference to always take the shortest path
+         double yawError = MathUtil.angleModulus(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
+         Logger.recordOutput("Reefscape/AlignReef/YawError", yawError);
+
+         // Intitializes rotation rates
+         double velocityX = 0.0;
+         double velocityY = 0.0;
+         double velocityYaw = 0.0;
+
+         // Movement Correction
+        if (distance > positionTolerance) {
+            // Normalizes the error vector into a unit vector (value between -1 to 1) and applies the speed
+            // The error vector represent both the direction and magnitude as the same. 
+            velocityX = (error.getX() / distance) * speed;
+            velocityY = (error.getY() / distance) * speed;
+        } 
+        else {
+            // Wont move if within tolerance
+            velocityX = 0;
+            velocityY = 0;
+        }
+        // Rotational Correction 
+        if (Math.abs(yawError) > yawTolerance) {
+            velocityYaw = calculateYawVelocity(yawError);
+            if (rotateFirst){
+                velocityX = 0;
+                velocityY = 0;
+            }
+        } 
+        else {
+            // Wont rotate if within tolerance
+            velocityYaw = 0;
+        }
+        // Returns the X, Y, Yaw powers
+        double[] result = new double[]{velocityX, velocityY, velocityYaw};
+        Logger.recordOutput("Reefscape/AlignReef/CalculatedVelocities", result);
+        return result;
+    }   
+
+    // Calculates the needed velocities to get to the target pose with PID
+    private double[] calculateErrorPID(Pose2d currentPose, boolean rotateFirst){
+        // Calculates the power for X direction and clamp it between -1 and 1
+        double velocityX = pidX.calculate(currentPose.getX());
+        velocityX = MathUtil.clamp(velocityX, -speed, speed);
+        
+        // Calculates the power for Y direction and clamp it between -1 and 1
+        double velocityY = pidY.calculate(currentPose.getY());
+        velocityY = MathUtil.clamp(velocityY, -speed, speed);
+        // Calculates the power for the Rotation direction and clamps it between -2 and 2
+        double velocityYaw = pidRotate.calculate(currentPose.getRotation().getRadians());
+        velocityYaw = MathUtil.clamp(velocityYaw, -2, 2);
+        // Logs PID values
+        Logger.recordOutput("Reefscape/Limelight/x error", pidX.getError());
+        Logger.recordOutput("Reefscape/Limelight/y error", pidY.getError());
+        Logger.recordOutput("Reefscape/AlignReef/RotationalError", pidRotate.getError());
+        Logger.recordOutput("Reefscape/Limelight/PIDOutputX", velocityX);
+        Logger.recordOutput("Reefscape/Limelight/PIDOutputY", velocityY);
+        Logger.recordOutput("Reefscape/AlignReef/PIDOutputYaw", velocityYaw);
+
+        // Returns the X, Y, Yaw powers
+        double[] result = new double[]{velocityX, velocityY, velocityYaw};
+        Logger.recordOutput("Reefscape/AlignReef/CalculatedPIDVelocities", result);
+        return result;
+    }
+
+    // Returns the velocity for the yaw
+    private double calculateYawVelocity(double yawError) {
+        return Math.signum(yawError) * rotationSpeed;
     }
 
     // Called every 20ms to check if command is ended
     @Override
-    public boolean isFinished() {
+    public boolean isFinished(){
         // If a tag wasn't detected, command will end
-        if (!tagDetected) {
-            return true;
-        }        
-        return super.isFinished();
+        if (!tagDetected){
+            //return true;
+        }
+        // Without PID, it will check until the tolerance is reached
+        if (!usingPID){
+            Pose2d currentPose = drivetrain.getState().Pose;
+            if (currentPose != null && targetPose != null){
+                double distance = targetPose.getTranslation().getDistance(currentPose.getTranslation());
+                // This gets the yaw error from the target
+                double yawError = MathUtil.angleModulus(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
+
+                // Ends once robot is within tolerance
+                return distance <= positionTolerance && Math.abs(yawError) <= yawTolerance;
+            }
+            else{
+                return super.isFinished();
+            }
+            
+        }
+        // PID will have its own tolerance check, so isFinished is unnecessary
+        else{
+            return super.isFinished();
+        }
     }
 
     // Called once Command ends
     @Override
-    public void end(boolean interrupted) {
+    public void end(boolean interrupted){
         // Ensures drivetrain stop
         drivetrain.setControl(stop);
         robotContainer.MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.7;
@@ -251,6 +325,6 @@ public class AlignReef extends Command{
         else {
             System.out.println("AlignReef completed.");
         }
-        robotContainer.joystick.setRumble(RumbleType.kBothRumble, 0.2);
     }
+
 }

@@ -15,7 +15,7 @@ public class IntakeCoral extends Command{
 
     DumpRollerSubsystem dumpRoller;
     // Indicated if using sensor
-    boolean usingSensor = true;
+    boolean usingSensor = false;
     // Indicates if coral was detected
     boolean coralDetected = false;
     // How much seconds to wait before ending command
