@@ -137,9 +137,11 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
 
         // Aligns to the reef april tag, right side
-        joystick.rightBumper().whileTrue(new AlignReef(this, Constants.ReefPos.RIGHT)).onFalse(Commands.startEnd(() -> joystick2.setRumble(RumbleType.kBothRumble, 0.7), () -> joystick2.setRumble(RumbleType.kBothRumble, 0)).withTimeout(0.25));
+        joystick.rightBumper().whileTrue(new AlignReef(this, Constants.ReefPos.RIGHT));
+        //.onFalse(Commands.startEnd(() -> joystick2.setRumble(RumbleType.kBothRumble, 0.7), () -> joystick2.setRumble(RumbleType.kBothRumble, 0)).withTimeout(0.25));
         // Aligns to the reef april tag, left side
-        joystick.leftBumper().whileTrue(new AlignReef(this, Constants.ReefPos.LEFT)).onFalse(Commands.startEnd(() -> joystick2.setRumble(RumbleType.kBothRumble, 0.7), () -> joystick2.setRumble(RumbleType.kBothRumble, 0)).withTimeout(0.25));;
+        joystick.leftBumper().whileTrue(new AlignReef(this, Constants.ReefPos.LEFT));
+        //.onFalse(Commands.startEnd(() -> joystick2.setRumble(RumbleType.kBothRumble, 0.7), () -> joystick2.setRumble(RumbleType.kBothRumble, 0)).withTimeout(0.25));;
 
         // Overdrive button for speed
         joystick.b().whileTrue(increaseSpeed()).onFalse(decreaseSpeed());

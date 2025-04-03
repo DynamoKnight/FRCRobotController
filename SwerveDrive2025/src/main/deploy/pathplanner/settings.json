@@ -3,9 +3,11 @@
   "robotLength": 0.851,
   "holonomicMode": true,
   "pathFolders": [],
-  "autoFolders": [],
+  "autoFolders": [
+    "Old Autos"
+  ],
   "defaultMaxVel": 4.5,
-  "defaultMaxAccel": 8.0,
+  "defaultMaxAccel": 7.8,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 1500.0,
   "defaultNominalVoltage": 12.0,
@@ -17,7 +19,7 @@
   "maxDriveSpeed": 5.202,
   "driveMotorType": "krakenX60FOC",
   "driveCurrentLimit": 120.0,
-  "wheelCOF": 1.0,
+  "wheelCOF": 0.8,
   "flModuleX": 0.264,
   "flModuleY": 0.264,
   "frModuleX": 0.264,

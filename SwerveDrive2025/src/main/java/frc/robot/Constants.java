@@ -36,8 +36,8 @@ public final class Constants {
         static {
             // Points are in inches, Angles are in degrees
             // RED SIDE
-            aprilTagMap.put(1, new double[]{657.37, 25.80, 58.50, 126.0, 0.0});
-            aprilTagMap.put(2, new double[]{657.37, 291.20, 58.50, 234.0, 0.0});
+            // aprilTagMap.put(1, new double[]{657.37, 25.80, 58.50, 126.0, 0.0});
+            // aprilTagMap.put(2, new double[]{657.37, 291.20, 58.50, 234.0, 0.0});
             aprilTagMap.put(3, new double[]{455.15, 317.15, 51.25, 270.0, 0.0});
             aprilTagMap.put(4, new double[]{365.20, 241.64, 73.54, 0.0, 30.0});
             aprilTagMap.put(5, new double[]{365.20, 75.39, 73.54, 0.0, 30.0});
@@ -48,8 +48,8 @@ public final class Constants {
             aprilTagMap.put(10, new double[]{481.39, 158.50, 12.13, 180.0, 0.0});
             aprilTagMap.put(11, new double[]{497.77, 130.17, 12.13, 240.0, 0.0});
             // BLUE SIDE
-            aprilTagMap.put(12, new double[]{33.51, 25.80, 58.50, 54.0, 0.0});
-            aprilTagMap.put(13, new double[]{33.51, 291.20, 58.50, 306.0, 0.0});
+            //aprilTagMap.put(12, new double[]{33.51, 25.80, 58.50, 54.0, 0.0});
+            // aprilTagMap.put(13, new double[]{33.51, 291.20, 58.50, 306.0, 0.0});
             aprilTagMap.put(14, new double[]{325.68, 241.64, 73.54, 180.0, 30.0});
             aprilTagMap.put(15, new double[]{325.68, 75.39, 73.54, 180.0, 30.0});
             aprilTagMap.put(16, new double[]{235.73, -0.15, 51.25, 90.0, 0.0});

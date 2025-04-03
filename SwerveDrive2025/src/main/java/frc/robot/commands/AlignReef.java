@@ -69,6 +69,15 @@ public class AlignReef extends Command{
     // April Tags on the field
     AprilTagFieldLayout aprilTagMap;
 
+    // Add a variable to store the first detected AprilTag ID
+    private Integer storedTagID = null;
+
+    private double calculateDistance(Pose2d pose1, Pose2d pose2){
+        double dx = pose1.getX() - pose2.getX();
+        double dy = pose1.getY() - pose2.getY();
+        return Math.sqrt(dx*dx + dy*dy);
+    }
+
     // CONSTRUCTOR
     public AlignReef(RobotContainer robotContainer, ReefPos reefPos){
         this.robotContainer = robotContainer;
@@ -91,10 +100,52 @@ public class AlignReef extends Command{
         Logger.recordOutput("Reefscape/AlignReef/CommandStarted", true);
         Logger.recordOutput("Reefscape/AlignReef/StartTime", timer.get());
         
-        // Gets the tag ID that is being targeted
-        tID = limelight.getTid();
+        double minDistance = Double.MAX_VALUE;
+        Pose2d robotPose = drivetrain.getState().Pose;
+        if (robotPose==null) {
+            tagDetected = false;
+            return;
+        }
+
+        for (int id : Constants.AprilTagMaps.aprilTagMap.keySet()) {
+            double[] aprilTagList = Constants.AprilTagMaps.aprilTagMap.get(id);
+            Pose2d aprilTagPose = new Pose2d(aprilTagList[0] * Constants.inToM, aprilTagList[1] * Constants.inToM, new Rotation2d(aprilTagList[3] * Math.PI / 180));
+            double distance = calculateDistance(robotPose, aprilTagPose);
+            if (distance < minDistance) {
+                minDistance = distance;
+                tID = id;
+                targetPose = aprilTagPose;
+            }
+        }
+    
+        // Check if a tag was found
+        if (minDistance == Double.MAX_VALUE) {
+            tagDetected = false;
+            System.out.println("Error: No AprilTag found.");
+            Logger.recordOutput("Reefscape/AlignReef/Error", "No AprilTag found.");
+            return;
+        }
+    
+        // Store the first detected tag ID
+        if (storedTagID == null) {
+            storedTagID = tID;
+            Logger.recordOutput("Reefscape/AlignReef/StoredTagID", storedTagID);
+        }
+
+        // Log the closest tag ID and pose
         Logger.recordOutput("Reefscape/AlignReef/TargetTagID", tID);
+        Logger.recordOutput("Reefscape/AlignReef/AprilTagPose", targetPose);
+
+        // Gets the tag ID that is being targeted
+        tID = limelight.getTid();   
         
+        // Check if the detected tag switches to 1, 2, 12, 13 revert to stored tag if so
+        if (tID == 1 || tID == 2 || tID == 12 || tID == 13) {
+            tID = storedTagID;
+            System.out.println("Switched to tag 1 or 2, reverting to stored tag: " + storedTagID);
+            Logger.recordOutput("Reefscape/AlignReef/RevertedToStoredTagID", storedTagID);
+        }
+
         double[] aprilTagList = Constants.AprilTagMaps.aprilTagMap.get(tID);
         // Checks if the tag exists within the list of all tags
         if (aprilTagList == null) {
@@ -121,7 +172,7 @@ public class AlignReef extends Command{
             else if (reefPos == ReefPos.RIGHT){
                 //System.out.println("right");
                 offsetX = -0.41;
-                offsetY = -0.23;
+                offsetY = -0.2335;
             }
             Logger.recordOutput("Reefscape/AlignReef/OffsetX", offsetX);
             Logger.recordOutput("Reefscape/AlignReef/OffsetY", offsetY);
@@ -169,7 +220,7 @@ public class AlignReef extends Command{
         Logger.recordOutput("Reefscape/AlignReef/ExecuteTime", timer.get());
         // Gets rotational error
         double yawError = MathUtil.angleModulus(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
-        Logger.recordOutput("Reefscape/AlignReef/YawError", yawError);
+        Logger.recordOutput("Reefscape/AlignReef/YawErrfor", yawError);
         
         // List of X, Y, Yaw velocities to go to target pose
         double[] velocities;

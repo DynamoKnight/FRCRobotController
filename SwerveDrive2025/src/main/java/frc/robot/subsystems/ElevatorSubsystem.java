@@ -22,7 +22,7 @@
         private final VoltageOut voltageOut = new VoltageOut(0);
 
         // Represents a list of the number of rotations to get to each level
-        public Double[] positions = {1.25, 11.0, 22.0, 39.0};
+        public Double[] positions = {0.125, 10.75, 22.0, 39.0};
         public int pos = 0;
 
         // Initializes the motors and controller
@@ -58,7 +58,7 @@
             config.CurrentLimits.SupplyCurrentLimit = 40;
             config.CurrentLimits.SupplyCurrentLimitEnable = true;
             // Limits for the height of the elevator
-            config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.5;
+            config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.125;
             config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
             config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 40.5;
             config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;

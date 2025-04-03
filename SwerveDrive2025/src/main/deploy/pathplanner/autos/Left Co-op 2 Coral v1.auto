@@ -7,13 +7,32 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Top Startline to Reef"
+            "pathName": "Blue - Center to Reef"
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Align Left"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Align Left"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Raise L4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
           }
         },
         {
@@ -23,13 +42,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Raise L4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Score L4"
+                  "name": "Score"
                 }
               },
               {
@@ -46,61 +59,30 @@
           "data": {
             "commands": [
               {
+                "type": "path",
+                "data": {
+                  "pathName": "Top Mid Reef to Station"
+                }
+              },
+              {
                 "type": "named",
                 "data": {
                   "name": "Raise L0"
                 }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Top Reef to Coral Station 1"
-                }
               }
             ]
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Top Coral Station to Reef 1"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Align Left"
+            "name": "Intake Coral"
           }
         },
         {
-          "type": "sequential",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Raise L4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Score L4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Stop Dump Roller"
-                }
-              }
-            ]
+            "pathName": "Top Station to Reef Coop"
           }
         },
         {
@@ -110,13 +92,13 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Raise L0"
+                  "name": "Align Left"
                 }
               },
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "Top Reef to Coral Station 2"
+                  "name": "Raise L4"
                 }
               }
             ]
@@ -125,19 +107,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Top Coral Station to Reef 3"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Align Right"
+            "waitTime": 0.25
           }
         },
         {
@@ -147,13 +117,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Raise L4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Score L4"
+                  "name": "Score"
                 }
               },
               {
@@ -169,6 +133,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "Old Autos",
+  "folder": null,
   "choreoAuto": false
 }

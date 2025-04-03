@@ -19,20 +19,20 @@ public class IntakeCoral extends Command{
     // Indicates if coral was detected
     boolean coralDetected = false;
     // How much seconds to wait before ending command
-    double delayTime = 0.125;
+    double delayTime = 0.0;
 
     // Buffer to store the last few current readings
     private static final int BUFFER_SIZE = 15;
     private Queue<Double> currentBuffer = new LinkedList<>();
 
     // Current threshold value indicating if coral was intaked
-    private static final double HIGH_CURRENT_THRESHOLD = 22;
+    private static final double HIGH_CURRENT_THRESHOLD = 35;
     // Number of readings needed above threshold to confirm coral was intaked
     private static final int HIGH_CURRENT_COUNT = 4;
 
 
     // CONSTRUCTOR
-    public IntakeCoral(RobotContainer robotcontainer){
+    public IntakeCoral(RobotContainer robotcontainer){          
         this.dumpRoller = robotcontainer.dumpRoller;
     }  
     
