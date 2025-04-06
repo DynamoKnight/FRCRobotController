@@ -92,7 +92,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Align Left"
+                  "name": "Align Right"
                 }
               },
               {
@@ -127,6 +127,31 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Reef to Station - Coop 2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Raise L0"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake Coral"
           }
         }
       ]

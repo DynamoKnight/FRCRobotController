@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.6715746111692216,
-        "y": 0.8979033514646336
+        "x": 2.754220208322137,
+        "y": 0.9570610437140803
       },
       "isLocked": false,
       "linkedName": "coopv2-2"
     },
     {
       "anchor": {
-        "x": 4.576960227272727,
-        "y": 1.23794034090909
+        "x": 4.002111486486487,
+        "y": 1.208699324324324
       },
       "prevControl": {
-        "x": 3.6759554205010914,
-        "y": 0.6757814688325935
+        "x": 3.3229109095030216,
+        "y": 0.8601837661382469
       },
       "nextControl": {
-        "x": 5.295482413186557,
-        "y": 1.6862438555624069
+        "x": 4.4877025385898675,
+        "y": 1.4578687778097768
       },
       "isLocked": false,
       "linkedName": null
@@ -36,12 +36,12 @@
         "y": 2.44450284090909
       },
       "prevControl": {
-        "x": 5.28224171332567,
-        "y": 2.0351839284411897
+        "x": 5.203644486594949,
+        "y": 2.142045924341044
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "coopv2-3"
     }
   ],
   "rotationTargets": [],
@@ -50,7 +50,7 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.5,
-    "maxAcceleration": 7.8,
+    "maxAcceleration": 9.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 1500.0,
     "nominalVoltage": 12.0,

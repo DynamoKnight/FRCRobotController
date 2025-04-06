@@ -76,15 +76,15 @@ public class IntakeCoral extends Command{
                 System.out.println("Coral detected! Stopping motor.");
             }
             // If coral was detected and delay timer has elapsed
-            if (coralDetected && timer.hasElapsed(delayTime)){
+            if (coralDetected){ //&& timer.hasElapsed(delayTime)){
                 return true;
             }
             
         }
         // Uses Current output to detect Coral
         else{
-            // Only checks after 1 second (It spikes when starting)
-            if (timer.get() > 1) {
+            // Only checks after 0.5 second (It spikes when starting)
+            if (timer.get() > 0.5) {
                 // The count of high currents detected
                 int highCurrentCount = 0;
                 // Counts number of values above threshold
@@ -108,6 +108,7 @@ public class IntakeCoral extends Command{
     public void end(boolean interrupted){
         // Stops the Dump Roller
         dumpRoller.coralMotor.set(0);
+        System.out.println("I have a Coral");
     }
 
 }

@@ -137,14 +137,28 @@ public class AlignReef extends Command{
         Logger.recordOutput("Reefscape/AlignReef/AprilTagPose", targetPose);
 
         // Gets the tag ID that is being targeted
-        tID = limelight.getTid();   
+        tID = limelight.getTid();
         
-        // Check if the detected tag switches to 1, 2, 12, 13 revert to stored tag if so
-        if (tID == 1 || tID == 2 || tID == 12 || tID == 13) {
-            tID = storedTagID;
-            System.out.println("Switched to tag 1 or 2, reverting to stored tag: " + storedTagID);
-            Logger.recordOutput("Reefscape/AlignReef/RevertedToStoredTagID", storedTagID);
-        }
+        //////////////////////////////////
+        /// ANDREW PLEASE LET ME TEST ///
+        ////////////////////////////////
+
+        // Check if the detected tag is one we want to ignore (1, 2, 12, or 13)
+        //if (tID == 1 || tID == 2 || tID == 12 || tID == 13) {
+            // If we have a previously stored tag ID, use that instead
+            //if (storedTagID != null) {
+                //System.out.println("Using stored tag ID: " + storedTagID + " instead of " + tID);
+                //Logger.recordOutput("Reefscape/AlignReef/UsingStoredTag", true);
+                //tID = storedTagID;
+            //} else {
+                    //System.out.println("Detected undesirable tag ID: " + tID + " but no stored tag available");
+            //}
+        //} else {
+            // If it's a valid reef tag, store it for future use
+            //System.out.println("Storing valid reef tag ID: " + tID);
+            //storedTagID = tID;
+            //Logger.recordOutput("Reefscape/AlignReef/StoredTagID", storedTagID);
+        //}
 
         double[] aprilTagList = Constants.AprilTagMaps.aprilTagMap.get(tID);
         // Checks if the tag exists within the list of all tags
@@ -366,14 +380,23 @@ public class AlignReef extends Command{
 
     // Called once Command ends
     @Override
-    public void end(boolean interrupted){
+    public void end(boolean interrupted) {
         // Ensures drivetrain stop
         drivetrain.setControl(stop);
         robotContainer.MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.7;
+
+        //////////////////////////////////
+        /// ANDREW PLEASE LET ME TEST ///
+        ////////////////////////////////
+
+        // Clear the stored tag ID when command ends
+        //System.out.println("Clearing stored tag ID: " + storedTagID);
+        //storedTagID = null;
+        //Logger.recordOutput("Reefscape/AlignReef/StoredTagID", -1);
+        
         if (interrupted) {
             System.out.println("AlignReef interrupted.");
-        } 
-        else {
+        } else {
             System.out.println("AlignReef completed.");
         }
     }

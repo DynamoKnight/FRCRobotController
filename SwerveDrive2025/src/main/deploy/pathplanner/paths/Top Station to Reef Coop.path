@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0914317192504477,
-        "y": 7.387050911298999
+        "x": 2.4475672437561427,
+        "y": 7.332430945337045
       },
       "isLocked": false,
       "linkedName": "Top coopv2"
@@ -20,28 +20,28 @@
         "y": 7.300667613636364
       },
       "prevControl": {
-        "x": 2.473232768731642,
-        "y": 7.278593396014989
+        "x": 2.5343248019435967,
+        "y": 7.335523594451739
       },
       "nextControl": {
-        "x": 3.3258521759261583,
-        "y": 7.3358373327695485
+        "x": 3.386661768875749,
+        "y": 7.224541518251211
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.314857954545454,
-        "y": 6.802088068181818
+        "x": 4.338091216216217,
+        "y": 6.821537162162161
       },
       "prevControl": {
-        "x": 4.742479890503288,
-        "y": 7.446521013880496
+        "x": 3.8349668264194317,
+        "y": 7.1834667396567005
       },
       "nextControl": {
-        "x": 5.495830556035424,
-        "y": 6.598333392739988
+        "x": 4.701530743212582,
+        "y": 6.560091847408607
       },
       "isLocked": false,
       "linkedName": null
@@ -52,12 +52,12 @@
         "y": 5.605497159090909
       },
       "prevControl": {
-        "x": 5.660300806766955,
-        "y": 5.849559265901729
+        "x": 5.317378710263924,
+        "y": 5.855484450349101
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Top coopv2-2"
     }
   ],
   "rotationTargets": [],
@@ -66,7 +66,7 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.5,
-    "maxAcceleration": 7.8,
+    "maxAcceleration": 9.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 1500.0,
     "nominalVoltage": 12.0,

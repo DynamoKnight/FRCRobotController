@@ -65,7 +65,7 @@ public class RobotContainer {
     public RobotContainer() {
         // Creates a Named Command, that can be accessed in path planner5
         // Raises Elevator to Level 4
-        NamedCommands.registerCommand("Raise L4", elevator.setPositionwithThreshold(3));
+        NamedCommands.registerCommand("Raise L4", elevator.setPositionwithThreshold(4));
         // Raises Elevator to Level 0
         NamedCommands.registerCommand("Raise L0", elevator.setPositionwithThreshold(0));
         // Outtakes Dump Roller on Reef
@@ -112,9 +112,10 @@ public class RobotContainer {
         );
 
         joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
-        ));
+        // This was causing the issue with overdrive
+        //joystick.b().whileTrue(drivetrain.applyRequest(() ->
+        //    point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
+        //));
 
         joystick.pov(0).whileTrue(drivetrain.applyRequest(() ->
             forwardStraight.withVelocityX(0.5).withVelocityY(0))
@@ -144,7 +145,7 @@ public class RobotContainer {
         //.onFalse(Commands.startEnd(() -> joystick2.setRumble(RumbleType.kBothRumble, 0.7), () -> joystick2.setRumble(RumbleType.kBothRumble, 0)).withTimeout(0.25));;
 
         // Overdrive button for speed
-        joystick.b().whileTrue(increaseSpeed()).onFalse(decreaseSpeed());
+        joystick.b().whileTrue(increaseSpeed()).onFalse(decreaseSpeed()); 
 
         // Outtakes coral 
         joystick.rightTrigger().onTrue(CoralOuttake());
@@ -155,14 +156,16 @@ public class RobotContainer {
         /////////////////////////////
         joystick2.setRumble(RumbleType.kBothRumble, 0);
         // TOGGLE ELEVATOR POSITIONS
-        // Level 1
+        // Level 0
         joystick2.b().onTrue(elevator.setPosition(0));
+        // Level 1
+        joystick2.rightTrigger().onTrue(elevator.setPosition(1));
         // Level 2
-        joystick2.a().onTrue(elevator.setPosition(1));
+        joystick2.a().onTrue(elevator.setPosition(2));
         // Level 3
-        joystick2.x().onTrue(elevator.setPosition(2));
+        joystick2.x().onTrue(elevator.setPosition(3));
         // Level 4
-        joystick2.y().onTrue(elevator.setPosition(3));
+        joystick2.y().onTrue(elevator.setPosition(4));
         // ARM CONTROLS
         // Moves Arm Upwards
         joystick2.rightBumper().whileTrue(arm.moveUp());
@@ -191,20 +194,25 @@ public class RobotContainer {
 
     // Outtakes Dump Roller Coral onto Reef
     private Command CoralOuttake(){
-        // List of speeds for each elevator level
-        // TEMPORARY VALUES
-        double[] launchSpeeds = {0.15, 0.2, 0.25, 0.30};
-        double speedToUse = launchSpeeds[elevator.pos];
-        System.out.println(elevator.pos);
+        // List of speeds for each elevator level (0-4)
+        // Position 0 uses a slower speed (0.1), all other positions use 0.2
+        double[] launchSpeeds = {0.1, 0.2, 0.2, 0.2, 0.2};
+        
+        // Safety check to prevent array index out of bounds - Im a genius
+        int posIndex = Math.min(elevator.pos, launchSpeeds.length - 1);
+        double speedToUse = launchSpeeds[posIndex];
+        
+        System.out.println("Elevator position: " + elevator.pos + 
+                           ", Rotation value: " + elevator.positions[elevator.pos] + 
+                           ", Speed: " + speedToUse);
 
         // Sequence of Commands
-        return Commands.sequence(
-            dumpRoller.dropCoral(.25).withTimeout(0.5),
+        return Commands.sequence(   
+            dumpRoller.dropCoral(speedToUse).withTimeout(0.5), // This needs to be tested, switch speedToUse back to 0.2 if testing fails.
             dumpRoller.keepCoral().withTimeout(0.01),
-            // Drops to Level 1 after done
+            // Drops to Level 0 after done
             elevator.setPosition(0)
         );
-         
     }
 
     public Command getAutonomousCommand() {
@@ -213,11 +221,13 @@ public class RobotContainer {
     }
 
     public Command increaseSpeed(){
-        return Commands.run(() -> MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond));
+        //run() is now runOnce() because run() keeps executing the speed-setting code in a loop
+        return Commands.runOnce(() -> MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond));
     }
 
     public Command decreaseSpeed(){
-        return Commands.run(() -> MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.7);
+        //run() is now runOnce() because run() keeps executing the speed-setting code in a loop
+        return Commands.runOnce(() -> MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.7);
     }
 
     public void setSpeed(double speed){

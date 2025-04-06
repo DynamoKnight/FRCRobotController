@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
         // Initializes the motors and controller
         public DumpRollerSubsystem() {
-            coralSensor = new DigitalInput(9);
+            coralSensor = new DigitalInput(9); // On port 9 of the roboRIO
         }
 
         // Outtakes the coral

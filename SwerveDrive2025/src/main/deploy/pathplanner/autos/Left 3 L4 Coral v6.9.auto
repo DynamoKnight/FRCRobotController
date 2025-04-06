@@ -74,15 +74,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "sequential",
           "data": {
-            "name": "Intake Coral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Top Coral Station to Reef 1"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake Coral"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Top Coral Station to Reef 1"
+                }
+              }
+            ]
           }
         },
         {
@@ -149,15 +156,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "sequential",
           "data": {
-            "name": "Intake Coral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Top Coral Station to Reef 3"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake Coral"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Top Coral Station to Reef 3"
+                }
+              }
+            ]
           }
         },
         {
@@ -199,6 +213,25 @@
                 "type": "named",
                 "data": {
                   "name": "Stop Dump Roller"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Raise L0"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Top Reef to Station 3"
                 }
               }
             ]
