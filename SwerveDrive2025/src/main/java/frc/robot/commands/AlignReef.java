@@ -131,7 +131,7 @@ public class AlignReef extends Command{
             storedTagID = tID;
             Logger.recordOutput("Reefscape/AlignReef/StoredTagID", storedTagID);
         }
- 
+
         // Log the closest tag ID and pose
         Logger.recordOutput("Reefscape/AlignReef/TargetTagID", tID);
         Logger.recordOutput("Reefscape/AlignReef/AprilTagPose", targetPose);
