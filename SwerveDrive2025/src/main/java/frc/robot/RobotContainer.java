@@ -190,6 +190,10 @@ public class RobotContainer {
         // Continually runs Dump Roller on Left Trigger until coral detected
         joystick2.leftTrigger().onTrue(new IntakeCoral(this));
 
+        // Toggles arm positions up and down
+        joystick2.back().onTrue(arm.setDown());
+        joystick2.start().onTrue(arm.setUp());
+
     }
 
     // Outtakes Dump Roller Coral onto Reef
