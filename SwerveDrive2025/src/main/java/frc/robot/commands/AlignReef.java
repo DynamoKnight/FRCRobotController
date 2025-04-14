@@ -47,9 +47,9 @@ public class AlignReef extends Command{
     // The Desired position to go to
     private Pose2d targetPose;
     // The speed to move to position
-    private final double speed = 1.0;
+    private final double speed = 1.0; //1.5
     // The speed (rad/s) to rotate to position
-    private final double rotationSpeed = 0.75;
+    private final double rotationSpeed = 0.75; //1.25
     // The tolerance before stopping align (meters)
     private final double positionTolerance = 0.01;
     // The tolerance for yaw alignment (radians)
@@ -68,9 +68,11 @@ public class AlignReef extends Command{
     private boolean tagDetected;
     // April Tags on the field
     AprilTagFieldLayout aprilTagMap;
-
     // Add a variable to store the first detected AprilTag ID
     private Integer storedTagID = null;
+    // Flag to track if we've seen tag 10 or 21 first
+    //private boolean initiallyDetectedTag10 = false;
+    //private boolean initiallyDetectedTag21 = false;
 
     private double calculateDistance(Pose2d pose1, Pose2d pose2){
         double dx = pose1.getX() - pose2.getX();
@@ -138,27 +140,17 @@ public class AlignReef extends Command{
 
         // Gets the tag ID that is being targeted
         tID = limelight.getTid();
-        
-        //////////////////////////////////
-        /// ANDREW PLEASE LET ME TEST ///
-        ////////////////////////////////
-
-        // Check if the detected tag is one we want to ignore (1, 2, 12, or 13)
-        //if (tID == 1 || tID == 2 || tID == 12 || tID == 13) {
-            // If we have a previously stored tag ID, use that instead
-            //if (storedTagID != null) {
-                //System.out.println("Using stored tag ID: " + storedTagID + " instead of " + tID);
-                //Logger.recordOutput("Reefscape/AlignReef/UsingStoredTag", true);
-                //tID = storedTagID;
-            //} else {
-                    //System.out.println("Detected undesirable tag ID: " + tID + " but no stored tag available");
-            //}
-        //} else {
-            // If it's a valid reef tag, store it for future use
-            //System.out.println("Storing valid reef tag ID: " + tID);
-            //storedTagID = tID;
-            //Logger.recordOutput("Reefscape/AlignReef/StoredTagID", storedTagID);
-        //}
+ 
+/*         // Check if we initially see tag 10
+        if (tID == 10) {
+            initiallyDetectedTag10 = true;
+            System.out.println("Detected tag 10 - gonna keep this target if tag 11 appears");
+            Logger.recordOutput("Reefscape/AlignReef/InitiallyDetectedTag10", true);
+        } else if (tID == 21) {
+            initiallyDetectedTag21 = true;
+            System.out.println("Detected tag 21 - gonna keep this target if tag 20 appears");
+            Logger.recordOutput("Reefscape/AlignReef/InitiallyDetectedTag21", true);
+        } */
 
         double[] aprilTagList = Constants.AprilTagMaps.aprilTagMap.get(tID);
         // Checks if the tag exists within the list of all tags
@@ -217,7 +209,7 @@ public class AlignReef extends Command{
         //System.out.println("Target Pose2d: " + targetPose.getX() + ", " + targetPose.getY() + ", " + targetPose.getRotation().getDegrees());
 
         // Sets Robot Max Speed for Alignment
-        robotContainer.MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.7;
+        robotContainer.MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.7; // remove 0.7
     }
 
     // Called every 20ms to perform actions of Command
@@ -228,6 +220,18 @@ public class AlignReef extends Command{
             Logger.recordOutput("Reefscape/AlignReef/ExecuteSkipped", true);
             return;
         }
+
+/*         // Get the current tag ID from limelight
+        int currentTagID = limelight.getTid();
+        
+        // Maintain Tag
+        if (initiallyDetectedTag10 && currentTagID == 11) {
+            maintainTargetTag(10, 11);
+        }
+        else if (initiallyDetectedTag21 && currentTagID == 20) {
+            maintainTargetTag(21, 20);
+        } */
+
         // Gets current robot Pose2d
         Pose2d currentPose = drivetrain.getState().Pose;
         Logger.recordOutput("Reefscape/AlignReef/CurrentPose", currentPose);
@@ -269,6 +273,46 @@ public class AlignReef extends Command{
         }
 
     }
+
+/*     // Maintain targeting a specific tag when a different one is detected
+    private void maintainTargetTag(int targetTagID, int ignoredTagID) {
+        System.out.println("Saw tag " + ignoredTagID + ". Gonna continue targeting tag " + targetTagID);
+        Logger.recordOutput("Reefscape/AlignReef/MaintainingTag" + targetTagID, true);
+        tID = targetTagID;
+        
+        // Get the target pose for the specified tag
+        double[] tagList = Constants.AprilTagMaps.aprilTagMap.get(targetTagID);
+        if (tagList != null) {
+            // Get the tag pose
+            Pose2d tagPose = new Pose2d(
+                tagList[0] * Constants.inToM, 
+                tagList[1] * Constants.inToM, 
+                new Rotation2d(tagList[3] * Math.PI / 180)
+            );
+            
+            // Get the target rotation
+            double targetRotation = tagPose.getRotation().getRadians() - Math.PI;
+            targetRotation = MathUtil.angleModulus(targetRotation);
+            
+            // Calculate the rotated offsets
+            double newOffsetX = (offsetX * Math.cos(targetRotation)) - (offsetY * Math.sin(targetRotation));
+            double newOffsetY = (offsetX * Math.sin(targetRotation)) + ((offsetY * Math.cos(targetRotation)));
+            
+            // Update the target pose to use the tag's position with the offsets
+            targetPose = new Pose2d(
+                tagPose.getX() + newOffsetX,
+                tagPose.getY() + newOffsetY, 
+                new Rotation2d(targetRotation)
+            );
+            
+            // Update PID setpoints
+            pidX.setSetpoint(targetPose.getX());
+            pidY.setSetpoint(targetPose.getY());
+            pidRotate.setSetpoint(targetPose.getRotation().getRadians());
+            
+            Logger.recordOutput("Reefscape/AlignReef/UpdatedTargetPose", targetPose);
+        }
+    } */
 
     // Calculates the needed velocities to get to the target pose
     public double[] calculateError(Pose2d currentPose, boolean rotateFirst){
@@ -383,16 +427,15 @@ public class AlignReef extends Command{
     public void end(boolean interrupted) {
         // Ensures drivetrain stop
         drivetrain.setControl(stop);
-        robotContainer.MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.7;
-
-        //////////////////////////////////
-        /// ANDREW PLEASE LET ME TEST ///
-        ////////////////////////////////
-
-        // Clear the stored tag ID when command ends
-        //System.out.println("Clearing stored tag ID: " + storedTagID);
-        //storedTagID = null;
-        //Logger.recordOutput("Reefscape/AlignReef/StoredTagID", -1);
+        robotContainer.MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.7; //remove 0.7
+        
+/*         // Reset the tag 10 or tag 21 flag when command ends
+        initiallyDetectedTag10 = false;
+        initiallyDetectedTag21 = false;
+        System.out.println("Reset initiallyDetectedTag10 flag");
+        Logger.recordOutput("Reefscape/AlignReef/InitiallyDetectedTag10", false);
+        System.out.println("Reset initiallyDetectedTag21 flag");
+        Logger.recordOutput("Reefscape/AlignReef/InitiallyDetectedTag21", false); */
         
         if (interrupted) {
             System.out.println("AlignReef interrupted.");

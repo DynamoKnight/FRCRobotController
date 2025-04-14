@@ -19,17 +19,20 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.ReefPos;
 import frc.robot.commands.AlignReef;
 import frc.robot.commands.IntakeCoral;
+import frc.robot.commands.AlgaeCollection;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ArmWheelSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.DumpRollerSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 
 public class RobotContainer {
@@ -88,7 +91,7 @@ public class RobotContainer {
         // Open Loop doesn't use feedback, Close Loop uses feedback
         elevator.setDefaultCommand(elevator.setOpenLoop(() -> 0.2));
         dumpRoller.setDefaultCommand(dumpRoller.keepCoral());
-        arm.setDefaultCommand(arm.stopArm());
+        //arm.setDefaultCommand(arm.stopArm());
         wheel.setDefaultCommand(wheel.stopWheels());
 
         // Configures the Bindings
@@ -159,7 +162,7 @@ public class RobotContainer {
         // Level 0
         joystick2.b().onTrue(elevator.setPosition(0));
         // Level 1
-        joystick2.rightTrigger().onTrue(elevator.setPosition(1));
+        //joystick2.rightTrigger().onTrue(elevator.setPosition(1));
         // Level 2
         joystick2.a().onTrue(elevator.setPosition(2));
         // Level 3
@@ -168,14 +171,14 @@ public class RobotContainer {
         joystick2.y().onTrue(elevator.setPosition(4));
         // ARM CONTROLS
         // Moves Arm Upwards
-        joystick2.rightBumper().whileTrue(arm.moveUp());
+        //joystick2.rightBumper().whileTrue(arm.moveUp());
         // Moves Arm Downwards
-        joystick2.leftBumper().whileTrue(arm.moveDown());
+        //joystick2.leftBumper().whileTrue(arm.moveDown());
 
-        // Spins Wheels Clockwise, Left trigger safety button
-        joystick2.povUp().whileTrue(wheel.clockwiseWheels());
-        // Spins Wheels Counter-Clockwise, Left trigger safety button
-        joystick2.povDown().whileTrue(wheel.counterClockwiseWheels());
+        // Spins Wheels Clockwise with arm high position
+        joystick2.povUp().whileTrue(new InstantCommand(() -> arm.setSetpoint(-0.3)).andThen(wheel.clockwiseWheels()));
+        // Move arm to low position and spin wheels Counter-Clockwise
+        joystick2.povDown().whileTrue(new InstantCommand(() -> arm.setSetpoint(-0.34)).andThen(wheel.counterClockwiseWheels()));
 
         /*// Sticks coral out to make it easier to target
         joystick2.povLeft().onTrue(dumpRoller.PrepareCoral(true));
@@ -191,28 +194,38 @@ public class RobotContainer {
         joystick2.leftTrigger().onTrue(new IntakeCoral(this));
 
         // Toggles arm positions up and down
-        joystick2.back().onTrue(arm.setDown());
-        joystick2.start().onTrue(arm.setUp());
+        //joystick2.rightBumper().onTrue(arm.moveDown()).onFalse(arm.stopArm());
+        //joystick2.leftBumper().onTrue(arm.moveUp()).onFalse(arm.stopArm());
+        
+        // Right bumper for high algae position (currently on left bumper)
+        joystick2.rightBumper().onTrue(new InstantCommand(() -> arm.setSetpoint(-0.06)).andThen(Commands.waitSeconds(0.5)).andThen(wheel.clockwiseWheels()));
 
+        // Left bumper for 2nd lower algae position (currently on right trigger)
+        joystick2.leftBumper().onTrue(new InstantCommand(() -> arm.setSetpoint(-0.22)).andThen(Commands.waitSeconds(0.5)).andThen(wheel.clockwiseWheels()));
+
+        // Right trigger - Set arm position and then stop wheels
+        joystick2.rightTrigger().onTrue(new InstantCommand(() -> arm.setSetpoint(-0.455))
+            //.andThen(Commands.waitSeconds(0.5))  // Wait for arm to reach position
+            .andThen(wheel.stopWheels()));  // Stop the wheels after reaching position
     }
 
     // Outtakes Dump Roller Coral onto Reef
     private Command CoralOuttake(){
         // List of speeds for each elevator level (0-4)
         // Position 0 uses a slower speed (0.1), all other positions use 0.2
-        double[] launchSpeeds = {0.1, 0.2, 0.2, 0.2, 0.2};
+        double[] launchSpeeds = {0.1, 0.1, 0.2, 0.2, 0.2};
         
-        // Safety check to prevent array index out of bounds - Im a genius
+        // Safety check to prevent array index out of bounds
         int posIndex = Math.min(elevator.pos, launchSpeeds.length - 1);
         double speedToUse = launchSpeeds[posIndex];
         
-        System.out.println("Elevator position: " + elevator.pos + 
-                           ", Rotation value: " + elevator.positions[elevator.pos] + 
-                           ", Speed: " + speedToUse);
+        //System.out.println("Elevator position: " + elevator.pos + 
+                           //", Rotation value: " + elevator.positions[elevator.pos] + 
+                           //", Speed: " + speedToUse);
 
         // Sequence of Commands
         return Commands.sequence(   
-            dumpRoller.dropCoral(speedToUse).withTimeout(0.5), // This needs to be tested, switch speedToUse back to 0.2 if testing fails.
+            dumpRoller.dropCoral(0.2).withTimeout(0.5), // This needs to be tested, switch speedToUse back to 0.2 if testing fails.
             dumpRoller.keepCoral().withTimeout(0.01),
             // Drops to Level 0 after done
             elevator.setPosition(0)
