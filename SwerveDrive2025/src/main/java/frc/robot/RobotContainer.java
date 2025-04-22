@@ -152,6 +152,9 @@ public class RobotContainer {
 
         // Outtakes coral 
         joystick.rightTrigger().onTrue(CoralOuttake());
+
+        // Level 1
+        joystick.leftTrigger().onTrue(elevator.setPosition(1));
         
 
         /////////////////////////////

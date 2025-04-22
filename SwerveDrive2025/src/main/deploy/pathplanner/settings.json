@@ -4,6 +4,7 @@
   "holonomicMode": true,
   "pathFolders": [],
   "autoFolders": [
+    "GF Autos",
     "Old Autos"
   ],
   "defaultMaxVel": 4.5,
