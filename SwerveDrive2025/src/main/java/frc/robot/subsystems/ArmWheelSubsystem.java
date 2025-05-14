@@ -1,5 +1,8 @@
 package frc.robot.subsystems;
 
+import java.time.Period;
+
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 
@@ -12,10 +15,18 @@ public class ArmWheelSubsystem extends SubsystemBase{
     
     // The speed of the wheels
     private double spinSpeed = 0.5;
-    SparkMax spinMotor = new SparkMax(4, MotorType.kBrushless);
+    //SparkMax spinMotor = new SparkMax(4, MotorType.kBrushless);
+    TalonFX spinMotor = new TalonFX(18);
+    public double velocity;
 
     public ArmWheelSubsystem(){
 
+    }
+
+    @Override
+    public void periodic() {
+        velocity = getVelocity();
+        SmartDashboard.putNumber("intake velocity", velocity);
     }
     
     // Command to move the wheels clockwise
@@ -33,12 +44,10 @@ public class ArmWheelSubsystem extends SubsystemBase{
         return Commands.run(() -> spinMotor.set(0),this);
     }
 
+    // Returns the arm motors velocity
     public double getVelocity() {
-        return spinMotor.getEncoder().getVelocity();
+        return spinMotor.getVelocity().getValueAsDouble();
+        //return spinMotor.getEncoder().getVelocity();
     }
 
-    @Override
-    public void periodic(){
-        SmartDashboard.putNumber("intake velocity", spinMotor.getEncoder().getVelocity());
-    }
 }
