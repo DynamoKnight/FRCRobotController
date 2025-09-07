@@ -13,20 +13,24 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static class OperatorConstants {
-    public static final int controllerPort0 = 0;
-    public static final int controllerPort1 = 1;
+  public static class Operator {
+    public static final int CONTROLLER_PORT_0 = 0;
+    public static final int CONTROLLER_PORT_1 = 1;
   }
 
-  public static class DrivetrainConstants {
-    public static final int frontLeftID = 1;
-    public static final int backLeftID = 2;
-    public static final int frontRightID = 3;
-    public static final int backRightID = 4;
-    public static final double slowMovePower = 0.3;
-    public static final double slowTurnPower = 0.3;
-    public static final double fastMovePower = 1;
-    public static final double fastTurnPower = 0.7;
+  public static class Drivetrain {
+    public static final int FRONT_LEFT_ID = 1;
+    public static final int BACK_LEFT_ID = 2;
+    public static final int FRONT_RIGHT_ID = 3;
+    public static final int BACK_RIGHT_ID = 4;
+    public static final double SLOW_MOVE_POWER = 0.3;
+    public static final double SLOW_TURN_POWER = 0.3;
+    public static final double FAST_MOVE_POWER = 1;
+    public static final double FAST_TURN_POWER = 0.7;
+    public static final double WHEEL_DIAMETER = 0.1524; // 6 in
+    public static final double GEAR_RATIO = 10.71;
+    public static final double ENCODERS_TO_METERS = WHEEL_DIAMETER * Math.PI / GEAR_RATIO;
+    public static final double TRACK_WIDTH_METERS = 0.5; // Distance between the left and right wheels
 
   }
 

@@ -5,7 +5,9 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.DriveCommand;
+import frc.robot.commands.ExampleAuto;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -24,7 +26,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
   // The controller
-  public static CommandXboxController controller1 = new CommandXboxController(Constants.OperatorConstants.controllerPort0);
+  public static CommandXboxController controller1 = new CommandXboxController(Constants.Operator.CONTROLLER_PORT_0);
   // For autonomous
   SendableChooser<Command> sc = new SendableChooser<Command>();
 
@@ -34,6 +36,13 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
+
+    // Adds an auto
+    sc.addOption("SimpleAuto", new ExampleAuto(drivetrainSubsystem));
+    // The default
+    sc.setDefaultOption("SimpleAuto", new ExampleAuto(drivetrainSubsystem));
+    // Adds onto SmartDashboard for telemetry
+    SmartDashboard.putData("AutoChooser", sc);
   }
 
   /**

@@ -7,7 +7,6 @@ import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.LauncherSubsystem;
 
 public class RightAutoEsc extends SequentialCommandGroup{
-
     /**
      * Creates a sequence of commands for autonomous.
      * @param drivetrain The drivetrain subsystem used to drive the robot.
